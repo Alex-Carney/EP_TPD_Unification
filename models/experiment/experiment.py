@@ -17,7 +17,6 @@ class Experiment(Base):
     set_cavity_fb_phase_deg = Column(Float)
     set_cavity_fb_att = Column(Float)
 
-    set_voltage = Column(Float)
-    set_amperage = Column(Float)
+    independent_variable = Column(String, nullable=False)
 
-    raw_data = relationship("RawData", back_populates="experiment", cascade="all, delete-orphan")
+    traces = relationship("Trace", back_populates="experiment", cascade="all, delete-orphan")
