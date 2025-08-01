@@ -199,7 +199,7 @@ def fit_cavity_trace(
         fd: Sequence[float],
         power_dbm: Sequence[float],
         *,
-        fit_in_db: bool = True,
+        fit_in_db: bool = False,
         n_starts: int = 8,
 ) -> FitOutcome:
     return _fit_single_resonance(fd, power_dbm, _lorentzian, fit_in_db=fit_in_db, n_starts=n_starts)
@@ -209,7 +209,7 @@ def fit_yig_trace(
         fd: Sequence[float],
         power_dbm: Sequence[float],
         *,
-        fit_in_db: bool = True,
+        fit_in_db: bool = False,
         n_starts: int = 8,
 ) -> FitOutcome:
     return _fit_single_resonance(fd, power_dbm, _lorentzian, fit_in_db=fit_in_db, n_starts=n_starts)

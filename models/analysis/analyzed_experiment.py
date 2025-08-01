@@ -2,20 +2,13 @@ from sqlalchemy import (
     Column, Integer, Float, String
 )
 from sqlalchemy.orm import relationship
-from models.base import Base
+from models.analysis_base import AnalysisBase
 
-class AnalyzedExperiment(Base):
+
+class AnalyzedExperiment(AnalysisBase):
     __tablename__ = "analyzed_experiment"
     id = Column(Integer, primary_key=True, autoincrement=True)
     analyzed_experiment_id = Column(String, unique=True, index=True, nullable=False)
-
-    set_loop_phase_deg = Column(Float)
-    set_loop_att = Column(Float)
-    set_loopback_att = Column(Float)
-    set_yig_fb_phase_deg = Column(Float)
-    set_yig_fb_att = Column(Float)
-    set_cavity_fb_phase_deg = Column(Float)
-    set_cavity_fb_att = Column(Float)
 
     # Analyzed
     independent_variable = Column(String, nullable=False)
@@ -43,6 +36,13 @@ class AnalyzedExperiment(Base):
     Delta_f_std = Column(Float, nullable=True)
 
     # Relationships
-    analyzed_traces = relationship("AnalyzedTrace", back_populates="analyzed_experiment", cascade="all, delete-orphan")
-    analyzed_peaks = relationship("AnalyzedPeaks", back_populates="analyzed_experiment", cascade="all, delete-orphan")
-    theory_traces = relationship("TheoryTrace", back_populates="analyzed_experiment", cascade="all, delete-orphan")
+    analyzed_aggregate_traces = relationship(
+        "AnalyzedAggregateTrace",
+        back_populates="analyzed_experiment",
+        cascade="all, delete-orphan"
+    )
+    theory_data_points = relationship(
+        "TheoryDataPoint",
+        back_populates="analyzed_experiment",
+        cascade="all, delete-orphan"
+    )

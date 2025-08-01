@@ -46,4 +46,6 @@ def load_config(config_path: str, config_name: str = "default") -> ETLConfig:
         amperage_max=cfg["amperage_limits"]["max"],
         phi_value=cfg["phi_value"],
         readout_type=cfg["readout_type"],
+        J_value=cfg["J_value"],
+        a0_guess=cfg["a0_guess"]
     )

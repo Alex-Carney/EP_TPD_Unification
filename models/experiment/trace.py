@@ -12,6 +12,10 @@ class Trace(Base):
 
     set_voltage = Column(Float)
     set_amperage = Column(Float)
+    # This is the independent variable for phi/2 TPDs, thus it is included in the trace
+    delta_kappa = Column(Float)
+    # Also directly calculated in the experimental sweep for phi/2 TPDs, included here
+    delta_f = Column(Float)
     readout_type = Column(String)
 
     raw_data = relationship("RawData", back_populates="trace", cascade="all, delete-orphan")

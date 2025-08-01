@@ -3,11 +3,11 @@
     "phi_value": 0.0,
     "J_value": 1.045e6,
     "a0_guess": 4.4625e+15,
-    "readout_type": "normal",
+    "readout_type": "nr",
     "frequency_limits": {
       "colorplot": {
-        "min": 6.0045e9,
-        "max": 6.0080e9
+        "min": 6.00e9,
+        "max": 6.012e9
       },
       "cavity": {
         "min": 6.002e9,
