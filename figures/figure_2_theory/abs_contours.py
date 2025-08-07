@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from tpd_locations_nd import ep_location, DegeneracyType, tpd_location
+from figures.figure_2_theory.tpd_locations_nd import ep_location, DegeneracyType, tpd_location
 from mesh_nd import MeshND, corner_tag
 from settings import STYLE
 

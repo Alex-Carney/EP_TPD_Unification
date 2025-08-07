@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.gridspec as gridspec
 from matplotlib.lines import Line2D
-from tpd_locations_nd import ep_location, DegeneracyType
+from figures.figure_2_theory.tpd_locations_nd import ep_location, DegeneracyType
 from settings import STYLE
 from matplotlib.ticker import FormatStrFormatter
 from mesh_nd import get as get_mesh, corner_tag
