@@ -2,8 +2,8 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-from analysis_pt.FIG_METRICS_ND.tpd_locations_nd import TPDLocation, standard_tpd_locations, standard_ep_locations
-from analysis_pt.pt_peaks_MODEL import peak_location
+from figures.figure_3_experiment.experiment_tpds import standard_tpd_locations, standard_ep_locations, TPDLocation
+from fitting.peak_fitting import peak_location
 
 from scipy.optimize import curve_fit
 

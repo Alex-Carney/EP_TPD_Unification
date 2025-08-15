@@ -41,10 +41,10 @@ import matplotlib.patches as mpatches
 import matplotlib.transforms as mtrans
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import fitting.peak_fitting as peaks
-from figures.figure_3_experiment.experiment_tpds import standard_tpd_locations
+from figures.figure_3_experiment.experiment_tpds import standard_tpd_locations, standard_ep_locations
 
 from figures.figure_3_experiment.style_maps import phase_peak_theory_color_map
-from models.analysis import AnalyzedExperiment
+from models.analysis import AnalyzedExperiment, analyzed_experiment
 
 # ────────────────────────────────────── plotting constants
 # COL_PEAK             = "purple"
@@ -167,7 +167,7 @@ def create_small_panel(
     # iterate over scan points ---------------------------------------
     for df_i, dk_i in zip(delta_f, delta_kappa):
         # physical (Hz) values already
-        lam1, lam2 = peaks.eigenvalues(J, f_c_HZ, k_c, df_i, dk_i, phi)
+        _, lam1, lam2 = peaks.eigenvalues(J, f_c_HZ, k_c, df_i, dk_i, phi)
         lp, lm = sorted([lam1, lam2], key=lambda z: z.imag, reverse=True)
 
         # if np.isclose(phi, np.pi/2):
@@ -355,7 +355,8 @@ def right_small_panels(*args, **kwargs):
 # ----------------------------------------------------------------------
 def hybrid_small_panels(ax_top: plt.Axes,
                         ax_bot: plt.Axes,
-                        *, data_dir: Path, exp_id: str,
+                        *, data_dir: Path,
+                        analyzed_experiment: AnalyzedExperiment,
                         J_scale: float, f_c: float,
                         phi: float,
                         xlims: tuple[float, float] = None,
@@ -377,7 +378,7 @@ def hybrid_small_panels(ax_top: plt.Axes,
     # 3) call the generic helper
     create_small_panel(
         ax_top, ax_bot,
-        data_dir=data_dir, exp_id=exp_id,
+        data_dir=data_dir, analyzed_experiment=analyzed_experiment,
         J_scale=J_scale, f_c=f_c,
         phi=phi,
         delta_f=df_hz * J_scale,
@@ -417,9 +418,6 @@ def _draw_inset(ax_par: plt.Axes,
 
     ins.plot(x, c1, color=COL_EIG, linestyle=LS_EIG)
     ins.plot(x, c2, color=COL_EIG, linestyle=LS_EIG)
-    if peaks_hi is not None:
-        ins.plot(x, peaks_hi, color=COL_PEAK)
-        ins.plot(x, peaks_lo, color=COL_PEAK)
 
     for xv, col, ls in vlines:
         ins.axvline(xv, color=col, ls=ls, lw=BASE_LINEWIDTH)

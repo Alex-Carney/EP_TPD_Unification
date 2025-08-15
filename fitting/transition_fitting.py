@@ -33,10 +33,10 @@ def TPD_location(phi, kappa_c, J):
 def instability_location(phi, kappa_c, J):
     if np.isclose(phi, 0):
         if kappa_c/J <= 2:
-            return kappa_c / J
+            return kappa_c
         else:
             kcj = kappa_c / J
-            return (kcj**2 + 4) / (2 *kcj)
+            return ( (kcj**2 + 4) / (2 *kcj) ) * J
     if np.isclose(phi, np.pi):
         return np.sqrt(4 * J ** 2 - kappa_c ** 2)
     if np.isclose(phi, np.pi / 2):

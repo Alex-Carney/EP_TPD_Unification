@@ -4,16 +4,16 @@ from operator import attrgetter
 import numpy as np
 from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker, selectinload
-import model_fitting as fit
-import peak_fitting as peaks
-import plot_fitting as plot_fit
+import fitting.model_fitting as fit
+import fitting.peak_fitting as peaks
+import fitting.plot_fitting as plot_fit
 import simulate_theory as theory
 from errors.data_integrity_error import DataIntegrityError
 from errors.data_load_error import DataLoadError
 from etl.etl_config import ETLConfig, load_all_configs
-from etl.model_fitting import CoupledFitOutcome
 from etl.settings import ETLSettings
-from etl.transition_fitting import EP_location, TPD_location, instability_location
+from fitting.model_fitting import CoupledFitOutcome
+from fitting.transition_fitting import EP_location, TPD_location, instability_location
 from models.analysis import TheoryDataPoint
 from models.analysis.analyzed_experiment import AnalyzedExperiment
 from models.analysis.analyzed_trace import AnalyzedAggregateTrace
@@ -28,8 +28,9 @@ Transforms data by fitting Lorentzians and applying statistical methods
 Loads data into CSVs for consumption in Figures/
 """
 def main():
-    # Part 1 : EXTRACTION -  Load configs, data from DB
+    # Part 1: EXTRACTION - Load configs, data from DB
     settings: ETLSettings = ETLSettings()
+    np.random.seed(settings.SEED)
     expr_id_config_map: dict[str, ETLConfig] = load_all_configs(settings.CONFIG_PATH)
     # Engines for old data and transformed data
     raw_data_engine = create_engine("sqlite:///" + settings.RAW_DATA_DB_PATH, future=True)
@@ -83,7 +84,7 @@ def main():
                 ###
                 # STEP 1 - FIT THE INDIVIDUAL MODES
                 ###
-                # pick out the cavity trace & fit
+                # pick out the cavity trace and fit
                 cavity_trace = next(t for t in traces if t.readout_type == "cavity")
                 cavity_freqs  = np.asarray([rd.frequency_hz for rd in cavity_trace.raw_data if expr_config.cavity_freq_min <= rd.frequency_hz <= expr_config.cavity_freq_max])
                 cavity_power = np.asarray([rd.power_dBm    for rd in cavity_trace.raw_data if expr_config.cavity_freq_min <= rd.frequency_hz <= expr_config.cavity_freq_max])
@@ -204,14 +205,26 @@ def main():
                 J_avg=J_val, fc_avg=np.mean(f_c_vals), kc_avg=kappa_c_val,
                 settings=settings
             )
-            # Zip these into a list of TheoryDataPoint objects
+
+            cleaned_nu_plus = []
+            for np_val, nm_val in zip(theory_results_nu_plus, theory_results_nu_minus):
+                if np_val is None or (isinstance(np_val, float) and np.isnan(np_val)):
+                    cleaned_nu_plus.append(nm_val)
+                else:
+                    cleaned_nu_plus.append(np_val)
+
+            # Now zip with the cleaned nu_plus
             theory_data_points: list[TheoryDataPoint] = [
                 TheoryDataPoint(
                     analyzed_experiment_pk=exp.id,
-                    Delta_f=df_val, Delta_kappa=dk_val, nu_plus=nu_plus, nu_minus=nu_minus
+                    Delta_f=df_val,
+                    Delta_kappa=dk_val,
+                    nu_plus=np_val,
+                    nu_minus=nm_val
                 )
-                for df_val, dk_val, nu_plus, nu_minus in zip(theory_df,
-                                                             theory_dk, theory_results_nu_plus, theory_results_nu_minus)
+                for df_val, dk_val, np_val, nm_val in zip(
+                    theory_df, theory_dk, cleaned_nu_plus, theory_results_nu_minus
+                )
             ]
 
             analyzed_expr = AnalyzedExperiment(

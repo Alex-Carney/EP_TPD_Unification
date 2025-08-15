@@ -109,9 +109,9 @@ def plot_big_pane(
     ep_df = ep_loc_tilde.Delta_tilde_f * scale
     offset = (f_c - ep_df/2) / scale
 
-    peaks    = pd.read_csv(data_dir / f"{exp_id}_peaks.csv")
-    theory   = pd.read_csv(data_dir / f"{exp_id}_theory.csv")
-    specials = pd.read_csv(data_dir / f"{exp_id}_specials.csv")
+    # peaks    = pd.read_csv(data_dir / f"{exp_id}_peaks.csv")
+    # theory   = pd.read_csv(data_dir / f"{exp_id}_theory.csv")
+    # specials = pd.read_csv(data_dir / f"{exp_id}_specials.csv")
 
     theory: list[TheoryDataPoint] = analyzed_experiment.theory_data_points
     peaks: list[AnalyzedAggregateTrace] = analyzed_experiment.analyzed_aggregate_traces
@@ -135,40 +135,39 @@ def plot_big_pane(
     nu_plus_err_high = np.asarray([peak.nu_plus_err_high_data_Hz / scale  - offset  for peak in peaks])
 
     # divide x by J
-    for df in (peaks, theory):
-        df[x_key] = df[x_key] / scale
+    # for df in (peaks, theory):
+    #     df[x_key] = df[x_key] / scale
 
     # divide and shift y arrays
-    def _shift(df, col):
-        if col in df.columns:
-            df[col] = df[col] / scale - offset
-
-    for df in (peaks, theory):
-        for col in ["peak_mean", "nu_plus", "nu_minus",
-                    "nu_plus_mc_low", "nu_plus_mc_high",
-                    "nu_minus_mc_low", "nu_minus_mc_high"]:
-            _shift(df, col)
+    # def _shift(df, col):
+    #     if col in df.columns:
+    #         df[col] = df[col] / scale - offset
+    #
+    # for df in (peaks, theory):
+    #     for col in ["peak_mean", "nu_plus", "nu_minus",
+    #                 "nu_plus_mc_low", "nu_plus_mc_high",
+    #                 "nu_minus_mc_low", "nu_minus_mc_high"]:
+    #         _shift(df, col)
 
     # Divide all specials["x"] by sc ale
-    specials["x"] = specials["x"] / scale
+    # specials["x"] = specials["x"] / scale
 
     # errors only divide (no shift)
-    for col in ["err_low", "err_high"]:
-        if col in peaks.columns:
-            peaks[col] = peaks[col] / scale
+    # for col in ["err_low", "err_high"]:
+    #     if col in peaks.columns:
+    #         peaks[col] = peaks[col] / scale
 
 
     ERROR_BAR_FACTOR = 5
-    err_low = peaks["err_low"]
-    err_high = peaks["err_high"]
-    yerr_scaled = np.array([
-        np.asarray(err_low) * ERROR_BAR_FACTOR,
-        np.asarray(err_high) * ERROR_BAR_FACTOR
-    ])
-    # scatter
+    err_low_nu_plus = nu_plus_mean - nu_plus_err_low
+    err_high_nu_plus = nu_plus_err_high - nu_plus_mean
+    yerr_scaled_nu_plus = [np.maximum(err_low_nu_plus, 0.0) * ERROR_BAR_FACTOR,
+                           np.maximum(err_high_nu_plus, 0.0) * ERROR_BAR_FACTOR]
+    peak_ind_var = df_peaks if x_key == "Delta_f" else dk_peaks
+    # scatter nu plus
     ax.errorbar(
-        peaks[x_key], peaks["peak_mean"],
-        yerr=yerr_scaled,
+        peak_ind_var, nu_plus_mean,
+        yerr=yerr_scaled_nu_plus,
         fmt="o", markersize=5, ecolor="black", capsize=0,
         alpha=1, color="black",
         markerfacecolor='none',
@@ -176,7 +175,23 @@ def plot_big_pane(
         label=r"$\tilde \nu_\pm$ Data" if phi_val == 0 else None
     )
 
-    print(f'For phi = {phi_val}, J is {J_scale / 1e6} MHz, the range of ${x_key} goes from {np.min(peaks[x_key])} to {np.max(peaks[x_key])}')
+    err_low_nu_minus = nu_minus_mean - nu_minus_err_low
+    err_high_nu_minus = nu_minus_err_high - nu_minus_mean
+    yerr_scaled_nu_minus = [np.maximum(err_low_nu_minus, 0.0) * ERROR_BAR_FACTOR,
+                            np.maximum(err_high_nu_minus, 0.0) * ERROR_BAR_FACTOR]
+    # scatter nu minus
+    ax.errorbar(
+        peak_ind_var, nu_minus_mean,
+        yerr=yerr_scaled_nu_minus,
+        fmt="o", markersize=5, ecolor="black", capsize=0,
+        alpha=1, color="black",
+        markerfacecolor='none',
+        markeredgecolor='black',
+        label=None
+    )
+
+
+    print(f'For phi = {phi_val}, J is {J_scale / 1e6} MHz, the range of ${x_key} goes from {np.min(peak_ind_var)} to {np.max(peak_ind_var)}')
 
     theory_color = phase_peak_theory_color_map(phi_val)
 
@@ -187,9 +202,10 @@ def plot_big_pane(
             color=theory_color, linewidth=2,
             label=r"$\tilde \nu_\pm$")
 
-
-    draw_special_lines(ax, specials, x_key, phi_val)
-    forgotten_special_lines(ax, theory_var, phi_val, kappa_c / scale)
+    ax.axvline(tpd_loc, color="cyan", ls="-", lw=VERT_W,)
+    ax.axvline(ep_loc,  color="red",  ls="-", lw=VERT_W,)
+    if instab_loc is not None:
+        ax.axvline(instab_loc, color="lime", ls="-", lw=VERT_W,)
 
     ax.set_xlabel(xlab)
     ax.set_ylabel(r"(Frequency - $f_{EP}$)/J")
@@ -207,18 +223,14 @@ def plot_big_pane(
 
     # unstable label (Delta_f)
     if x_key == "Delta_f":
-        inst = specials[specials["name"].str.startswith("Instab") &
-                        ~specials["name"].str.endswith(("_low", "_high"))]
-        if not inst.empty:
-            x_inst = inst["x"].iloc[0]
-            span   = ax.get_xlim()[1] - ax.get_xlim()[0]
-            offs   = 0.125 * span
-            trans  = mtrans.blended_transform_factory(ax.transData, ax.transAxes)
-            if draw_unstable:
-                ax.text(x_inst - offs, 0.85, "unstable",
-                        transform=trans, ha="right", va="top",
-                        fontsize=LEGEND_FONT_SIZE + 4, fontweight="bold",
-                        rotation=90)
+        span   = ax.get_xlim()[1] - ax.get_xlim()[0]
+        offs   = 0.125 * span
+        trans  = mtrans.blended_transform_factory(ax.transData, ax.transAxes)
+        if draw_unstable:
+            ax.text(instab_loc - offs, 0.85, "unstable",
+                    transform=trans, ha="right", va="top",
+                    fontsize=LEGEND_FONT_SIZE + 4, fontweight="bold",
+                    rotation=90)
 
     # Finally set the axis limits
     ax.set_xlim(xlims[0], xlims[1])

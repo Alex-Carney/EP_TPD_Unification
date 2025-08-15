@@ -7,7 +7,7 @@ class FigMetricStyle:
     label_font    : int   = 22
     legend_font   : int   = 15
     theory_legend_font: int = 17
-    save_dpi      : int   = 400
+    save_dpi      : int   = 300
 
     # colors / line-widths ------------------------------------------------
     curve_lw      : float = 3.0
@@ -44,9 +44,13 @@ class FigMetricStyle:
         np.pi/2  : 2.32,
         np.pi    : 1.66,
     }
+    reference_paper_kappa = {
+        0.0: 0.137
+    }
 
     star_ms   : int   = 220
     tri_ms    : int   = 220
+    ref_ms: int = 220 * 2
 
 
 STYLE = FigMetricStyle()

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ETLSettings:
+    # Don't change this unless you want different random numbers from Monte Carlo
     SEED = 12345
     CONFIG_PATH = "./etl_config.json"
     RAW_DATA_DB_PATH = "../data/ep_tpd_experiment_data.db"
@@ -34,5 +35,5 @@ class ETLSettings:
     THEORY_SIZE = 2500
 
     # Number of monte carlo shots (Default: 10**3, Paper: 10**4)
-    MONTE_CARLO_SHOTS = 10**3
+    MONTE_CARLO_SHOTS = 10**4
 

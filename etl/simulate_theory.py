@@ -1,6 +1,6 @@
 import numpy as np
 from etl.settings import ETLSettings
-import peak_fitting as peaks
+import fitting.peak_fitting as peaks
 
 
 def simulate_theory(phi, df, dk, J_avg, fc_avg, kc_avg, settings: ETLSettings):

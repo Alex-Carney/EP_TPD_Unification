@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.patheffects as pe
 from sqlalchemy import create_engine, select
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, selectinload
 from big_pane   import plot_big_pane
 import small_panes
 from models.analysis import AnalyzedExperiment
@@ -143,9 +143,13 @@ def _add_cluster(row0: int,
     # Load data from database using sqlalchemy
     DataSession = sessionmaker(bind=create_engine(f"sqlite:///{DATA_LOCATION}"))
     with DataSession() as session:
-        # Replace exp_L and exp_R with the correct ID column (likely `analyzed_experiment_id`)
-        stmt = select(AnalyzedExperiment).where(
-            AnalyzedExperiment.analyzed_experiment_id.in_([exp_L, exp_R])
+        stmt = (
+            select(AnalyzedExperiment)
+            .options(
+                selectinload(AnalyzedExperiment.analyzed_aggregate_traces),
+                selectinload(AnalyzedExperiment.theory_data_points)
+            )
+            .where(AnalyzedExperiment.analyzed_experiment_id.in_([exp_L, exp_R]))
         )
         experiments = session.scalars(stmt).all()
 

@@ -9,7 +9,7 @@ from typing import Sequence, Optional, Tuple
 import numpy as np
 import matplotlib.pyplot as plt
 
-from etl.model_fitting import FitOutcome, CoupledFitOutcome
+from fitting.model_fitting import FitOutcome, CoupledFitOutcome
 
 plt.rcParams["font.family"] = "sans-serif"
 

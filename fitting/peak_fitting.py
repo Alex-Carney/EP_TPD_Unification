@@ -18,10 +18,10 @@ import numpy as np
 
 def _eigenvalues_core(J: float, kappa_c: float, delta_f: float, delta_kappa: float, f_c: float, phi: float):
     lambda_0 = (delta_kappa - kappa_c)/2 + 1j * (delta_f/2 - f_c)
-    delta_lambda = np.sqrt(-delta_f**2 + 2 * delta_f * delta_kappa * 1j + delta_kappa**2 - 4 * J * np.exp(1j * phi))
+    delta_lambda = np.sqrt(-delta_f**2 + 2 * delta_f * delta_kappa * 1j + delta_kappa**2 - 4 * J**2 * np.exp(1j * phi))
     lambda_plus = lambda_0 + delta_lambda / 2
     lambda_minus = lambda_0 - delta_lambda / 2
-    return np.array([lambda_plus, lambda_minus])
+    return np.array([lambda_0, lambda_plus, lambda_minus])
 
 
 def _p_q_discriminant_core(
@@ -97,7 +97,7 @@ def eigenvalues(
         delta_kappa: float,
         phi: float,
 ):
-    return _eigenvalues_core(J, kappa_c, delta_f, delta_kappa, f_c, phi)
+    return _eigenvalues_core(J=J, kappa_c=kappa_c, delta_f=delta_f, delta_kappa=delta_kappa, f_c=f_c, phi=phi)
 
 
 # ---------------------------------------------------------------------
