@@ -197,9 +197,6 @@ def plot_big_pane(
         label=None
     )
 
-
-    print(f'For phi = {phi_val}, J is {J_scale / 1e6} MHz, the range of ${x_key} goes from {np.min(peak_ind_var)} to {np.max(peak_ind_var)}')
-
     theory_color = phase_peak_theory_color_map(phi_val)
 
     theory_var = df_theory if x_key == "Delta_f" else dk_theory

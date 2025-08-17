@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker, selectinload
 import fitting.model_fitting as fit
 import fitting.peak_fitting as peaks
 import fitting.plot_fitting as plot_fit
-import simulate_theory as theory
+import etl.simulate_theory as theory
 from errors.data_integrity_error import DataIntegrityError
 from errors.data_load_error import DataLoadError
 from etl.etl_config import ETLConfig, load_all_configs

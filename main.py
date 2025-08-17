@@ -10,8 +10,9 @@ This script:
 
 import os
 import sys
+import importlib.util
+import subprocess
 from pathlib import Path
-from typing import List
 
 # Check for required databases
 def check_raw_databases(data_dir: Path) -> bool:
@@ -47,39 +48,69 @@ def check_transformed_data(data_dir: Path) -> bool:
     """
     return (data_dir / "ep_tpd_transformed_data.db").exists()
 
-def run_etl_pipeline():
+def run_etl_pipeline(project_root: Path):
     """Run the ETL pipeline to transform raw data."""
     print("Transformed data not found. Running ETL pipeline...")
 
     try:
-        # Import here to avoid circular imports
-        from etl.etl_pipeline import main as etl_main
-        etl_main()
-        print("ETL pipeline completed successfully!")
+        # Change directory to etl to ensure config is found
+        etl_dir = project_root / "etl"
+        script_path = etl_dir / "etl_pipeline.py"
+
+        # Run the ETL script in its own directory context
+        result = subprocess.run(
+            [sys.executable, str(script_path)],
+            cwd=str(etl_dir),
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode != 0:
+            print(f"ERROR: ETL pipeline failed: {result.stderr}")
+            raise Exception(result.stderr)
+        else:
+            print("ETL pipeline completed successfully!")
+            if result.stdout.strip():
+                print(result.stdout)
     except Exception as e:
         print(f"ERROR: ETL pipeline failed: {str(e)}")
         raise
 
-def generate_figures():
+def run_figure_script(script_path, script_name):
+    """Run a figure generation script using subprocess to avoid import issues."""
+    print(f"Generating {script_name}...")
+    try:
+        # Use subprocess to run the script in its own directory to avoid import issues
+        script_dir = script_path.parent
+        result = subprocess.run(
+            [sys.executable, str(script_path)],
+            cwd=str(script_dir),
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode != 0:
+            print(f"ERROR: Failed to generate {script_name}:")
+            print(result.stderr)
+        else:
+            print(f"Successfully generated {script_name}")
+            if result.stdout.strip():
+                print(result.stdout)
+    except Exception as e:
+        print(f"ERROR: Failed to generate {script_name}: {str(e)}")
+        print("Continuing with next figure...")
+
+def generate_figures(project_root):
     """Generate all four figures for the project."""
-    figure_modules = [
-        ("Figure 1 (Platform)", "figures.figure_1_platform.main_fig1"),
-        ("Figure 2 (Theory)", "figures.figure_2_theory.main_figure_2"),
-        ("Figure 3 (Experiment)", "figures.figure_3_experiment.main_figure_3"),
-        ("Figure 4 (Metrics)", "figures.figure_4_metrics.main_figure_4")
+    figure_scripts = [
+        ("Figure 1 (Platform)", project_root / "figures" / "figure_1_platform" / "main_fig1.py"),
+        ("Figure 2 (Theory)", project_root / "figures" / "figure_2_theory" / "main_figure_2.py"),
+        ("Figure 3 (Experiment)", project_root / "figures" / "figure_3_experiment" / "main_figure_3.py"),
+        ("Figure 4 (Metrics)", project_root / "figures" / "figure_4_metrics" / "main_figure_4.py")
     ]
 
-    for fig_name, module_path in figure_modules:
-        print(f"Generating {fig_name}...")
-        try:
-            module = __import__(module_path, fromlist=["main"])
-            if hasattr(module, "main"):
-                module.main()
-            else:
-                print(f"WARNING: No main function found in {module_path}")
-        except Exception as e:
-            print(f"ERROR: Failed to generate {fig_name}: {str(e)}")
-            print("Continuing with next figure...")
+    for fig_name, script_path in figure_scripts:
+        run_figure_script(script_path, fig_name)
 
 def main():
     """Main entry point for the EP-TPD Unification project."""
@@ -88,7 +119,7 @@ def main():
     print("="*80)
 
     # Get the project root directory
-    project_root = Path(__file__).parent
+    project_root = Path(__file__).parent.absolute()
     data_dir = project_root / "data"
 
     # Step 1: Check if all raw databases are present
@@ -102,7 +133,7 @@ def main():
     print("\nChecking for transformed data...")
     if not check_transformed_data(data_dir):
         try:
-            run_etl_pipeline()
+            run_etl_pipeline(project_root)
         except Exception:
             print("Exiting due to ETL pipeline failure.")
             return 1
@@ -111,7 +142,7 @@ def main():
 
     # Step 3: Generate all figures
     print("\nGenerating figures...")
-    generate_figures()
+    generate_figures(project_root)
 
     print("\n"+"="*80)
     print("EP-TPD Unification Project Completed Successfully!")
