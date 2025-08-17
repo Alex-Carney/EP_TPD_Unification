@@ -158,7 +158,6 @@ def peak_location_mc(
             plus_list.append(peaks[0])
             minus_list.append(peaks[1])
         else:  # single root → add to both
-            minus_list.append(peaks[0])
             plus_list.append(peaks[0])
 
     def _stats(arr):

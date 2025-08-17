@@ -128,11 +128,18 @@ def plot_big_pane(
     df_peaks = np.asarray([peak.Delta_f_Hz / scale for peak in peaks])
     dk_peaks = np.asarray([peak.Delta_kappa_Hz / scale for peak in peaks])
     nu_minus_mean = np.asarray([peak.nu_minus_mean_data_Hz / scale  - offset  for peak in peaks])
-    nu_plus_mean = np.asarray([peak.nu_plus_mean_data_Hz / scale  - offset  for peak in peaks])
     nu_minus_err_low = np.asarray([peak.nu_minus_err_low_data_Hz / scale  - offset  for peak in peaks])
     nu_minus_err_high = np.asarray([peak.nu_minus_err_high_data_Hz / scale  - offset  for peak in peaks])
-    nu_plus_err_low = np.asarray([peak.nu_plus_err_low_data_Hz / scale  - offset  for peak in peaks])
-    nu_plus_err_high = np.asarray([peak.nu_plus_err_high_data_Hz / scale  - offset  for peak in peaks])
+
+    # Define peak indices where nu_plus data is not None
+    valid_nu_plus_indices = [i for i, peak in enumerate(peaks) if peak.nu_plus_mean_data_Hz is not None]
+
+    # Get x values (either Delta_f or Delta_kappa) only for peaks with valid nu_plus data
+    peak_ind_var_nu_plus = np.asarray([df_peaks[i] if x_key == "Delta_f" else dk_peaks[i] for i in valid_nu_plus_indices])
+
+    nu_plus_mean = np.asarray([peak.nu_plus_mean_data_Hz / scale - offset for peak in peaks if peak.nu_plus_mean_data_Hz is not None])
+    nu_plus_err_low = np.asarray([peak.nu_plus_err_low_data_Hz / scale - offset for peak in peaks if peak.nu_plus_err_low_data_Hz is not None])
+    nu_plus_err_high = np.asarray([peak.nu_plus_err_high_data_Hz / scale - offset for peak in peaks if peak.nu_plus_err_high_data_Hz is not None])
 
     # divide x by J
     # for df in (peaks, theory):
@@ -149,7 +156,7 @@ def plot_big_pane(
     #                 "nu_minus_mc_low", "nu_minus_mc_high"]:
     #         _shift(df, col)
 
-    # Divide all specials["x"] by sc ale
+    # Divide all specials["x"] by scale
     # specials["x"] = specials["x"] / scale
 
     # errors only divide (no shift)
@@ -166,7 +173,7 @@ def plot_big_pane(
     peak_ind_var = df_peaks if x_key == "Delta_f" else dk_peaks
     # scatter nu plus
     ax.errorbar(
-        peak_ind_var, nu_plus_mean,
+        peak_ind_var_nu_plus, nu_plus_mean,
         yerr=yerr_scaled_nu_plus,
         fmt="o", markersize=5, ecolor="black", capsize=0,
         alpha=1, color="black",

@@ -8,6 +8,7 @@ RIGHT column -> theory/model curves (with star/triangle markers)
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from matplotlib.lines import Line2D
 import numpy as np
@@ -210,5 +211,8 @@ for tag, ax in zip(right_tags, right_axes):
     ax.text(0.015, 0.98, tag, transform=ax.transAxes, ha="left", va="top", fontsize=22, fontweight="bold")
 
 # --------------- save ---------------------------------------------------
-fig.savefig("metrics_grid.png", dpi=STYLE.save_dpi)
-print("figure saved -> metrics_grid.png")
+
+if not os.path.exists("../../.figures"):
+        os.makedirs("../../.figures")
+
+fig.savefig("../../.figures/FIG_4_metrics.png", dpi=STYLE.save_dpi)

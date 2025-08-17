@@ -67,9 +67,9 @@ def _split_data_from_models(
         split = abs(nu_p - nu_m)
 
         # skip points before splitting
-        SPLIT_MIN_TILDE = 1e-1
-        if split <= SPLIT_MIN_TILDE:
-            continue
+        # SPLIT_MIN_TILDE = 1e-1
+        # if split <= SPLIT_MIN_TILDE:
+        #     continue
 
         # asymmetric errors are distances from mean
         lp = abs((p.nu_plus_mean_data_Hz  - p.nu_plus_err_low_data_Hz)  / j_scale)
@@ -115,14 +115,14 @@ def plot_splitting_pane(
     t_x = np.asarray([(tp.Delta_f if x_key == "Delta_f" else tp.Delta_kappa) / j_scale for tp in theory])
     t_split = np.asarray([abs(tp.nu_plus - tp.nu_minus) / j_scale for tp in theory])
 
-    # keep only points after the split appears, and sort
-    SPLIT_MIN_TILDE = 1e-1
-    mask = np.isfinite(t_split) & (t_split > SPLIT_MIN_TILDE) & np.isfinite(t_x)
-    t_x = t_x[mask]
-    t_split = t_split[mask]
-    order_t = np.argsort(t_x)
-    t_x = t_x[order_t]
-    t_split = t_split[order_t]
+    # # keep only points after the split appears, and sort
+    # SPLIT_MIN_TILDE = 1e-1
+    # mask = np.isfinite(t_split) & (t_split > SPLIT_MIN_TILDE) & np.isfinite(t_x)
+    # t_x = t_x[mask]
+    # t_split = t_split[mask]
+    # order_t = np.argsort(t_x)
+    # t_x = t_x[order_t]
+    # t_split = t_split[order_t]
 
     # experimental arrays from DB (dimensionless)
     peaks: list[AnalyzedAggregateTrace] = analyzed_experiment.analyzed_aggregate_traces

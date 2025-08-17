@@ -203,4 +203,4 @@ if __name__=="__main__":
     if not os.path.exists("../../.figures"):
         os.makedirs("../../.figures")
 
-    build_figure(N=STYLE.GRID_SIZE, filename="../../.figures/theory.png")
+    build_figure(N=STYLE.GRID_SIZE, filename="../../.figures/FIG_2_theory.png")

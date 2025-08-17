@@ -158,8 +158,8 @@ def main():
                     f_c_Hz=cavity_fit.f0, f_c_Hz_err=cavity_fit.f0_err, J_Hz=coupled_fit.J,
                     J_Hz_err=coupled_fit.J_err, a0_value=coupled_fit.a, a0_err=coupled_fit.a_err,
                     nu_minus_mean_data_Hz=means[0], nu_minus_err_low_data_Hz=mins[0],
-                    nu_minus_err_high_data_Hz=maxes[0], nu_plus_mean_data_Hz=means[1],
-                    nu_plus_err_low_data_Hz=mins[1], nu_plus_err_high_data_Hz=maxes[1],
+                    nu_minus_err_high_data_Hz=maxes[0], nu_plus_mean_data_Hz=means[1] if len(means)>1 else None,
+                    nu_plus_err_low_data_Hz=mins[1] if len(means)>1 else None, nu_plus_err_high_data_Hz=maxes[1] if len(means)>1 else None,
                     set_voltage=trace_set_voltage, set_amperage=trace_set_amperage,
                 ))
 

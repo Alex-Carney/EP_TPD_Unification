@@ -112,7 +112,7 @@ BOTTOM_X_LIMS = (-1.5, -0.3)
 BOTTOM_Y_FREQ_LIM = (-1, 3)
 BOTTOM_Y_RE_EIG_LIM = (-2.1, 0.25)
 
-OUTFIG  = Path("FIG_EPS/eps.png")
+OUTFIG  = Path("../../.figures/FIG_3_ep_tpds.png")
 FIGSIZE = (13, 15)
 
 # ──────────────────────────────────────────────────────────────────────
@@ -365,6 +365,9 @@ _add_cluster(
 )
 
 # ──────────────────────────────────────────────────────────────────────
+
+
+
 OUTFIG.parent.mkdir(parents=True, exist_ok=True)
 fig.savefig(OUTFIG, dpi=400)
 print("saved figure to", OUTFIG)
