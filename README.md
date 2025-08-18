@@ -1,15 +1,29 @@
-# EP-TPD Unification Project
+# EP-TPD Unification Project ⚛️
 
 This repository contains the code to analyze experimental data and generate figures for the EP-TPD Unification research paper. The project processes raw experimental data from cavity-magnon systems, performs data analysis to identify exceptional points (EPs) and topological phase transitions (TPDs), and generates publication-quality figures.
 
-## Installation
+## Installation 🛠️
 
 1. Clone this repository
-2. Install dependencies:
+2. Install dependencies (we recommend using a virtual environment):
    ```bash
+   # Create a virtual environment
+   python -m venv venv
+   
+   # Activate the virtual environment
+   # On Windows:
+   venv\Scripts\activate
+   # On macOS/Linux:
+   # source venv/bin/activate
+   
+   # Install dependencies
    pip install -r requirements.txt
    ```
-3. Run the main script:
+   
+   For more information on virtual environments, see:
+   - [Python venv documentation](https://docs.python.org/3/library/venv.html)
+   - [Conda environments](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) (if you prefer using Conda)
+3. Run the main script (Note, there is a lot of data to process, so this may take some time):
    ```bash
    python main.py
    ```
@@ -30,7 +44,7 @@ EP_TPD_Unification/
 └── theory/                # Theoretical calculations
 ```
 
-## Getting Started
+## Getting Started 🚀
 
 To run the full pipeline, execute the main script:
 
@@ -45,14 +59,17 @@ The script performs the following operations:
 
 If you want to force regeneration of the transformed data (for example, after changing analysis parameters), set the `FORCE_ETL` variable to `True` at the top of the main.py file.
 
-## Data Files
+## Data Files 💾
+
+TODO: Replace this with the links to download the databases from Zenodo/Git LFS/Dryad. The DB files are too large to be included
+in this repo directly.
 
 The `/data` directory contains:
 - `ep_tpd_experiment_data.db`: Raw experimental measurements
 - `fig1_raw_data.db`: Specific data for Figure 1
 - `ep_tpd_transformed_data.db`: Generated through the ETL pipeline with analyzed results
 
-## ETL Pipeline
+## ETL Pipeline 🔄
 
 The Extract, Transform, Load (ETL) pipeline in the `/etl` directory processes raw experimental data and generates analyzed datasets:
 
@@ -96,7 +113,7 @@ Throughout the project, there are several ways to customize the analysis and vis
 3. **Main Configuration**: At the top of `main.py`, you can set:
    - `FORCE_ETL`: Set to `True` to regenerate all transformed data
 
-## Models
+## Models 💽
 
 The `/models` directory contains the data model definitions:
 
