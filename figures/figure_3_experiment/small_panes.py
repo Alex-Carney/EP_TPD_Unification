@@ -33,18 +33,17 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Sequence, Tuple
 
-import numpy as np
-import pandas as pd
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
-import matplotlib.patches as mpatches
 import matplotlib.transforms as mtrans
+import numpy as np
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
 import fitting.peak_fitting as peaks
 from figures.figure_3_experiment.experiment_tpds import standard_tpd_locations, standard_ep_locations
-
 from figures.figure_3_experiment.style_maps import phase_peak_theory_color_map
-from models.analysis import AnalyzedExperiment, analyzed_experiment
+from models.analysis import AnalyzedExperiment
 
 # ────────────────────────────────────── plotting constants
 # COL_PEAK             = "purple"

@@ -10,9 +10,11 @@ This script:
 
 import os
 import sys
-import importlib.util
 import subprocess
 from pathlib import Path
+
+# Configuration options - Edit these to control the script's behavior
+FORCE_ETL = True  # Set to True to force regeneration of the transformed data
 
 # Check for required databases
 def check_raw_databases(data_dir: Path) -> bool:
@@ -50,7 +52,7 @@ def check_transformed_data(data_dir: Path) -> bool:
 
 def run_etl_pipeline(project_root: Path):
     """Run the ETL pipeline to transform raw data."""
-    print("Transformed data not found. Running ETL pipeline...")
+    print("Running ETL pipeline...")
 
     try:
         # Change directory to etl to ensure config is found
@@ -131,7 +133,11 @@ def main():
 
     # Step 2: Check if transformed data exists
     print("\nChecking for transformed data...")
-    if not check_transformed_data(data_dir):
+    transformed_data_exists = check_transformed_data(data_dir)
+
+    if not transformed_data_exists or FORCE_ETL:
+        if FORCE_ETL and transformed_data_exists:
+            print("Force ETL flag is set. Regenerating transformed data...")
         try:
             run_etl_pipeline(project_root)
         except Exception:
