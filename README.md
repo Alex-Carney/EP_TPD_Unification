@@ -1,6 +1,6 @@
 # EP-TPD Unification Project ⚛️
 
-This repository contains the code to analyze experimental data and generate figures for the EP-TPD Unification research paper. The project processes raw experimental data from cavity-magnon systems, performs data analysis to identify exceptional points (EPs) and topological phase transitions (TPDs), and generates publication-quality figures.
+This repository contains the code to analyze experimental data and generate figures for the EP-TPD Unification research paper. The project processes raw experimental data from cavity-magnon systems, performs data analysis to identify exceptional points (EPs) and transmission peak degeneracies (TPDs), and generates publication-quality figures.
 
 ## Installation 🛠️
 
@@ -162,4 +162,4 @@ We use MATLAB symbolic toolbox for all equations and include a `.mlx` file here.
 
 ## References
 
-This code is associated with the research paper: [Paper Title], which investigates the unification of exceptional points and topological phase transitions in cavity-magnon systems.
+This code is associated with the research paper: [Paper Title], which investigates the unification of exceptional points and transmission peak degeneracies in cavity-magnon systems.
