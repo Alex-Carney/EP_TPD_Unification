@@ -1,5 +1,4 @@
 .idea
-*.csv
 *.db
 *.db-journal
 *.db-shm
