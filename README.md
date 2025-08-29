@@ -64,6 +64,8 @@ If you want to force regeneration of the transformed data (for example, after ch
 TODO: Replace this with the links to download the databases from Zenodo/Git LFS/Dryad. The DB files are too large to be included
 in this repo directly.
 
+**Before we find a permanent home for the datasets, please download them from this shareable Dropbox link:** https://www.dropbox.com/scl/fo/mf0a0b37njk3fxiohd8h6/AIiZbizdXVbC4gj0lSXDnlY?rlkey=4v32ye26v5i53lbpwtc905ari&st=tup52m1z&dl=0
+
 The `/data` directory contains:
 - `ep_tpd_experiment_data.db`: Raw experimental measurements
 - `fig1_raw_data.db`: Specific data for Figure 1
