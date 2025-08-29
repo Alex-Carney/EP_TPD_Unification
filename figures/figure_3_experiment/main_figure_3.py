@@ -301,9 +301,9 @@ def _add_cluster(row0: int,
     y_hdr = ax_L_top.get_position().y1 + .019
 
     subpanel_letter_LR = {
-        0: ("a", "b"),
-        3: ("c", "d"),
-        6: ("e", "f"),
+        0: ("A", "B"),
+        3: ("C", "D"),
+        6: ("E", "F"),
     }
     lbl_L, lbl_R = subpanel_letter_LR[row0]
 
