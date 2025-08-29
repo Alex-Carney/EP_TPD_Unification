@@ -35,6 +35,8 @@ THEORY_ZORDER    = 7
 # Very small threshold to suppress only truly coalesced branches
 # Keep this tiny so we do not hide valid early split data
 SPLIT_MIN_TILDE = 1e-4
+# Threshold for theory plotting - slightly higher to remove flat lines
+THEORY_SPLIT_MIN_TILDE = 1e-6
 
 
 def _x_info(phi: float) -> Tuple[str, str]:
@@ -138,9 +140,24 @@ def plot_splitting_pane(
     t_x = np.asarray([(tp.Delta_f if x_key == "Delta_f" else tp.Delta_kappa) / j_scale for tp in theory])
     t_split = np.asarray([abs(tp.nu_plus - tp.nu_minus) / j_scale for tp in theory])
 
-    # filter only non-finite values in theory, do not sort, do not threshold away real data
+    kappa_tilde_c = kappa_c / j_scale
+    # Get the TPD location to use as a filter criterion
+    tpd = standard_tpd_locations(phi, kappa_tilde_c, left_tpd=True)
+    tpd_x_value = tpd.Delta_tilde_f if x_key == "Delta_f" else tpd.Delta_tilde_kappa
+
+    # Filter theory data to only include points at or after the TPD location
     if t_x.size:
-        mask_t = np.isfinite(t_x) & np.isfinite(t_split)
+        # For phi = 0 and phi = pi/2, we only include data where Delta_kappa >= TPD location
+        # For phi = pi, we only include data where Delta_f >= TPD location
+        if np.isclose(phi, np.pi):
+            mask_t = np.isfinite(t_x) & np.isfinite(t_split) & (t_x >= tpd_x_value)
+        else:
+            # For phi = 0 and phi = pi/2, TPD is a negative value, so we want x <= tpd_x_value
+            if tpd_x_value <= 0:
+                mask_t = np.isfinite(t_x) & np.isfinite(t_split) & (t_x >= tpd_x_value)
+            else:
+                mask_t = np.isfinite(t_x) & np.isfinite(t_split) & (t_x >= tpd_x_value)
+
         t_x = t_x[mask_t]
         t_split = t_split[mask_t]
 
@@ -148,8 +165,22 @@ def plot_splitting_pane(
     peaks: list[AnalyzedAggregateTrace] = analyzed_experiment.analyzed_aggregate_traces
     x_exp, y_exp, y_err = _split_data_from_models(peaks, x_key, j_scale)
 
+    # Filter experimental data to only include points at or after the TPD location
+    if x_exp.size:
+        if np.isclose(phi, np.pi):
+            mask_exp = np.isfinite(x_exp) & (x_exp >= tpd_x_value)
+        else:
+            if tpd_x_value <= 0:
+                mask_exp = np.isfinite(x_exp) & (x_exp >= tpd_x_value)
+            else:
+                mask_exp = np.isfinite(x_exp) & (x_exp >= tpd_x_value)
+
+        x_exp = x_exp[mask_exp]
+        y_exp = y_exp[mask_exp]
+        y_err = y_err[:, mask_exp]
+
     # decide labels and styles based on kappa_tilde_c proximity to STYLE target
-    kappa_tilde_c = kappa_c / j_scale
+
     star_value = FigMetricStyle.star_kappa[phi]
     tri_value = FigMetricStyle.tri_kappa[phi]
     is_small = abs(star_value - kappa_tilde_c) < abs(tri_value - kappa_tilde_c)
@@ -241,6 +272,13 @@ def plot_splitting_pane(
     if np.isclose(phi, np.pi/2.0):
         y_min, y_max = ax.get_ylim()
         ax.set_ylim(y_min, y_max + 0.2 * y_max)
+
+    if np.isclose(phi, np.pi):
+        ax.set_xlim(1.9, 3.3)
+        ax.set_ylim(-.2, 2.1)
+
+    if np.isclose(phi, 0):
+        ax.set_xlim(-1.5, .75)
 
     if include_legend:
         ax.legend(fontsize=STYLE.legend_font, framealpha=1.0, loc="upper left",
