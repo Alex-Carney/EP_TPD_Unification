@@ -5,3 +5,5 @@
 *.db-wal
 .plots
 .figures
+*~
+__pycache__
