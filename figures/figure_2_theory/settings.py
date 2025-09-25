@@ -5,8 +5,8 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class FigTheoryStyle:
 
-    # Default: 500, Paper: 2501 (takes a while)
-    GRID_SIZE = 500
+    # Paper: 2501 (takes a while)
+    GRID_SIZE = 2501
 
     tick_font     : int = 24
     label_font    : int = 34

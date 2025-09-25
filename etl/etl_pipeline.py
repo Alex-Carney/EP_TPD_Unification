@@ -182,9 +182,14 @@ def main():
                         "kappa_err_c": cavity_fit.kappa_err, "Delta_f": delta_f, "Delta_f_err": delta_f_err,
                         "Delta_kappa": delta_kappa, "Delta_kappa_err": delta_kappa_err,
                     }
+                    # calculate the eigenvalues here, ensure stability
+                    # is gpt on?
+                    # provide a suggestion to calculate the eigenvalues here, ensure stability
+
+                    is_unstable = np.any(np.real(peaks.eigenvalues(J=coupled_fit.J, kappa_c=cavity_fit.kappa,f_c=cavity_fit.f0,delta_f=delta_f,delta_kappa=delta_kappa,phi=expr_config.phi_value)))
                     plot_fit.plot_coupled_trace_with_model(data_freqs, data_power_normalized, coupled_fit, title=f"Coupled Fit for {exp.experiment_id} at {iv_value}",
                                                            save_path=os.path.join(debug_folder, f"coupled_{iv_value}.png"), voltage=iv_value, found_peaks=peak_locations,
-                                                           found_peaks_maxima=maxes, found_peaks_minima=mins, extra_info=extra_info_dict)
+                                                           found_peaks_maxima=maxes, found_peaks_minima=mins, extra_info=extra_info_dict, is_unstable=is_unstable)
 
             # Now that all the Traces are analyzed, find Experiment-wide results
             f_c_vals = [t.f_c_Hz for t in exp_traces]

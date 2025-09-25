@@ -143,7 +143,7 @@ handles.extend([star_proxy, tri_proxy, filled_star_proxy])
 labels.extend([r"Small $\tilde \kappa_c$", r"Large $\tilde \kappa_c$", r"Ref. 19 $\tilde \kappa_c$"])
 
 ax_max.set_xlabel(r"$\tilde{\kappa}_c$", fontsize=STYLE.label_font)
-ax_max.set_ylabel(r"Max Derivative / J", fontsize=STYLE.label_font)
+ax_max.set_ylabel(r"$\max(\tilde\chi)$", fontsize=STYLE.label_font)
 ax_max.legend(handles=handles, labels=labels, fontsize=STYLE.theory_legend_font,
               loc="upper right", framealpha=1, borderpad=.1, bbox_to_anchor=(1.01, 1.02))
 ax_max.tick_params(labelsize=STYLE.tick_font)
@@ -189,7 +189,7 @@ for j, phi in enumerate(PHI_SET):
 ax_dist.set_ylabel(r"$\text{dist}_2(\mathrm{EP\!-\!TPD})$", fontsize=STYLE.label_font)
 ax_dist.set_xlabel(r"$\tilde{\kappa}_c$", fontsize=STYLE.label_font)
 ax_pet.set_xlabel(r"$\tilde{\kappa}_c$", fontsize=STYLE.label_font)
-ax_pet .set_ylabel(r"$\bar{K}_2$(TPD)", fontsize=STYLE.label_font)
+ax_pet .set_ylabel(r"PF(TPD)", fontsize=STYLE.label_font)
 ax_pet.set_ylim(0.75, 5.0)
 for a in (ax_dist, ax_pet):
     a.tick_params(labelsize=STYLE.tick_font)

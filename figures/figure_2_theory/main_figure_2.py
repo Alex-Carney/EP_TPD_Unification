@@ -14,7 +14,7 @@ def _cbar_label(func):
     if func is _real_only:
         return r'Re$(\tilde \Delta_\lambda)$'
     if func is abs_contours.plot:
-        return r'$\bar{K}_2$'
+        return r'PF'
     return
 
 

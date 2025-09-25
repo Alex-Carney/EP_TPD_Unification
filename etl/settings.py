@@ -10,10 +10,10 @@ class ETLSettings:
     PLOT_OUTPUT_PATH = "../.plots/"
 
     # If TRUE, will create plots for each trace. This is much slower, and only needs to be run once. (Default: True, Paper: False)
-    CAV_YIG_DEBUG = False
+    CAV_YIG_DEBUG = True
 
     # If TRUE, will generate all traces for coupled mode (Default: True, Paper: False)
-    COUPLED_DEBUG = False
+    COUPLED_DEBUG = True
 
     # if TRUE, will treat phi as a free parameter in the fit (Default: False, Paper: False)
     FREE_PHI = False

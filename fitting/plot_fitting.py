@@ -117,7 +117,8 @@ def plot_coupled_trace_with_model(
         found_peaks_minima: Optional[Sequence[float]] = None,
         extra_info  = None,
         min_peak_height=10,
-        plot_in_linear=False
+        plot_in_linear=False,
+        is_unstable=False
 ) -> Tuple[plt.Figure, plt.Axes]:
     """Overlay raw trace, fitted model, stars for peak means,
     and vertical lines for [min,max] of each peak."""
@@ -185,6 +186,13 @@ def plot_coupled_trace_with_model(
         va="top", ha="left", fontsize=10,
         bbox=dict(boxstyle="round", alpha=0.1)
     )
+    #If is unstable, add a red text box at the bottom right saying UNSTABLE FIT
+    if is_unstable:
+        ax.text(
+            0.98, 0.02, "UNSTABLE PARAMETERS", transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=12, color="red", fontweight="bold",
+            bbox=dict(boxstyle="round", alpha=0.1, facecolor="white", edgecolor="red")
+        )
 
     ax.set_xlabel("Frequency")
     ax.set_ylabel("Power (dB)")
