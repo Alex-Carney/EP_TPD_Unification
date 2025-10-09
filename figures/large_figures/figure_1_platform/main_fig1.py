@@ -15,8 +15,8 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from sqlalchemy import create_engine, text
 
-# ───────────────────────────────────────── CONSTANTS ──────────────────────────
-DATA_LOCATION = Path("../../data/fig1_raw_data.db")
+
+DATA_LOCATION = Path("../../../data/fig1_raw_data.db")
 TABLE_NAME     = "expr"
 
 FIGSIZE   = (15, 20)   # inches
@@ -35,7 +35,7 @@ CURRENT_MIN, CURRENT_MAX = -99.9, 99.9
 # Panel tags (legacy had b..g because (a) was elsewhere)
 PANEL_TAGS = "bcdefg"
 
-# ───────────────────────────────────────── HELPERS ────────────────────────────
+# G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G�� HELPERS G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��
 def get_engine(db_path: str):
     return create_engine(f"sqlite:///{db_path}")
 
@@ -102,7 +102,7 @@ def plot_panel(ax, power, currents, freqs, show_xlabel, show_ylabel):
     ax.tick_params(axis="both", labelsize=TICK_FONT)
     return pc
 
-# ────────────────────────────────────────── MAIN ──────────────────────────────
+# G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G�� MAIN G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��
 def main():
     # All panels now read from the single merged DB
     engine = get_engine(DATA_LOCATION)
@@ -117,7 +117,7 @@ def main():
         (2, 1, "5fa268ba-7872-4bfc-8bfe-53da27ce36aa", None, "g"),
     ]
 
-    # ─── Figure layout (3 columns; last is colorbar gutter) ──────────────────
+    # G��G��G�� Figure layout (3 columns; last is colorbar gutter) G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��
     fig = plt.figure(figsize=FIGSIZE)
     gs  = GridSpec(
         3, 3,
@@ -164,7 +164,7 @@ def main():
                  fontsize=TAG_FONT, fontweight="bold",
                  fontfamily="sans-serif", ha="right", va="bottom")
 
-    # ─── single full-height color-bar aligned to right column ────────────────
+    # G��G��G�� single full-height color-bar aligned to right column G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��
     top_right    = axes[0, 1].get_position()
     bottom_right = axes[2, 1].get_position()
 
@@ -179,7 +179,7 @@ def main():
     cbar.set_label("Power [dBm]", fontsize=LABEL_FONT)
     cbar.ax.tick_params(labelsize=TICK_FONT)
 
-    # ─── save ────────────────────────────────────────────────────────────────
+    # G��G��G�� save G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��G��
     if not os.path.exists("../../.figures"):
         os.makedirs("../../.figures")
 

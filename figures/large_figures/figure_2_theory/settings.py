@@ -2,15 +2,16 @@
 from pathlib import Path
 from dataclasses import dataclass
 
-@dataclass(frozen=True)
+@dataclass()
 class FigTheoryStyle:
 
     # Paper: 2501 (takes a while)
-    GRID_SIZE = 2501
+    GRID_SIZE = 251
 
     tick_font     : int = 24
     label_font    : int = 34
     legend_font   : int = 24
+    corner_tag_font : int = 23
     cmap          : str = "inferno"
     gray_cmap     : str = "gray"
     scatter_size  : int = 350

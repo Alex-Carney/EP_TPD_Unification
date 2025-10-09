@@ -9,9 +9,10 @@ from __future__ import annotations
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from figures.figure_2_theory.tpd_locations_nd import ep_location, DegeneracyType, tpd_location
-from mesh_nd import MeshND, corner_tag
-from settings import STYLE
+
+from figures.large_figures.figure_2_theory.mesh_nd import MeshND, corner_tag
+from figures.large_figures.figure_2_theory.settings import STYLE
+from figures.large_figures.figure_2_theory.tpd_locations_nd import ep_location, DegeneracyType, tpd_location
 
 
 def plot(ax: plt.Axes,
@@ -103,10 +104,10 @@ def plot(ax: plt.Axes,
     # --- cosmetics -----------------------------------------------------
     if phi == 0:
         ax.set_xticklabels([])
-        ax.set_yticklabels([])
+        # Note: We're no longer setting y-tick labels here to let main.py control them
     if phi == np.pi or phi == np.pi/2:
         ax.set_xlabel(r"$\Delta_\kappa/J$", fontsize=STYLE.label_font)
-        ax.set_yticklabels([])
+        # Note: We're no longer setting y-tick labels here to let main.py control them
         ax.tick_params(axis="x", labelsize=STYLE.tick_font)
 
 

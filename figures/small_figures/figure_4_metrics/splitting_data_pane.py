@@ -18,9 +18,9 @@ from typing import Tuple
 import numpy as np
 import matplotlib.pyplot as plt
 
-from figures.figure_3_experiment.experiment_tpds import standard_tpd_locations
-from settings import FigMetricStyle
-from settings import STYLE
+from experiment_tpds import standard_tpd_locations
+from figures.small_figures.figure_4_metrics.settings import FigMetricStyle
+from figures.small_figures.figure_4_metrics.settings import STYLE
 from metric_calculations import min_split_over_J
 from metric_markers import scatter_metric_markers
 
@@ -191,10 +191,13 @@ def plot_splitting_pane(
         min_splitting_line_style = "--"
         if np.isclose(phi, np.pi):
             theory_label = r"Theory $\phi=\pi$"
+
         elif np.isclose(phi, np.pi/2.0):
             theory_label = r"Theory $\phi=\pi/2$"
+
         elif np.isclose(phi, 0.0):
             theory_label = r"Theory $\phi=0$"
+
         else:
             theory_label = r"Theory"
         data_label = r"Small $\tilde \kappa_c$ (Data)"
@@ -250,7 +253,7 @@ def plot_splitting_pane(
         x_range = x_max - x_min
         radius = 0.2 * x_range if x_range > 0 else 0.2
         x_tpd = tpd.Delta_tilde_kappa if not np.isclose(phi, np.pi) else tpd.Delta_tilde_f
-        xmin_hline = max(x_min, x_tpd - radius)
+        xmin_hline = (x_tpd - radius)
         xmax_hline = min(x_max, x_tpd + radius)
 
         ax.hlines(

@@ -5,9 +5,9 @@ import numpy as np
 class FigMetricStyle:
     tick_font     : int   = 18
     label_font    : int   = 22
-    legend_font   : int   = 15
-    theory_legend_font: int = 17
-    save_dpi      : int   = 300
+    legend_font   : int   = 1
+    theory_legend_font: int = 1
+    save_dpi      : int   = 400
 
     # colors / line-widths ------------------------------------------------
     curve_lw      : float = 3.0

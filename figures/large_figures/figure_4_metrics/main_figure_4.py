@@ -18,7 +18,7 @@ import matplotlib.gridspec as gridspec
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker, selectinload
 
-from figures.figure_3_experiment.experiment_tpds import standard_tpd_locations
+from figures.large_figures.figure_3_experiment.experiment_tpds import standard_tpd_locations
 from settings import STYLE
 from metric_markers import scatter_metric_markers
 from metric_calculations import (
@@ -32,7 +32,7 @@ from splitting_data_pane import plot_splitting_pane
 from models.analysis import AnalyzedExperiment
 
 # --------------- database path and experiment IDs ----------------------
-DATA_LOCATION = Path("../../data/ep_tpd_transformed_data.db")
+DATA_LOCATION = Path("../../../data/ep_tpd_transformed_data.db")
 
 ROW_EXPS: tuple[tuple[str, str], ...] = (
     ("cab5729f-0491-41f9-9fc8-acf0096754ab",

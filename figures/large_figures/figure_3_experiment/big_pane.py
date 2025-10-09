@@ -14,8 +14,8 @@ import matplotlib.ticker as mtick
 import matplotlib.transforms as mtrans
 from scipy.ndimage import gaussian_filter1d
 
-from figures.figure_3_experiment.experiment_tpds import standard_ep_locations
-from figures.figure_3_experiment.style_maps import phase_peak_theory_color_map
+from figures.large_figures.figure_3_experiment.experiment_tpds import standard_ep_locations
+from figures.large_figures.figure_3_experiment.style_maps import phase_peak_theory_color_map
 from models.analysis import AnalyzedExperiment, TheoryDataPoint, AnalyzedAggregateTrace
 
 LEGEND_FONT_SIZE = 13

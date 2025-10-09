@@ -41,8 +41,8 @@ import numpy as np
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 import fitting.peak_fitting as peaks
-from figures.figure_3_experiment.experiment_tpds import standard_tpd_locations, standard_ep_locations
-from figures.figure_3_experiment.style_maps import phase_peak_theory_color_map
+from figures.large_figures.figure_3_experiment.experiment_tpds import standard_tpd_locations, standard_ep_locations
+from figures.large_figures.figure_3_experiment.style_maps import phase_peak_theory_color_map
 from models.analysis import AnalyzedExperiment
 
 # ────────────────────────────────────── plotting constants

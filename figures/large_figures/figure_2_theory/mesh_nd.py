@@ -5,11 +5,13 @@ from dataclasses import dataclass
 import numpy as np
 from matplotlib import pyplot as plt
 
-from settings import STYLE
+
 import matplotlib.patheffects as pe
 
 # put this once, right after your regular imports
 import matplotlib as mpl
+
+from figures.large_figures.figure_2_theory.settings import STYLE
 
 
 @dataclass
@@ -141,7 +143,7 @@ def corner_tag(ax, phi: float, kappa_c: float, phi_only=False) -> None:
             0.97, 0.03, tag_string,
             transform=ax.transAxes,
             ha="right", va="bottom",
-            fontsize=STYLE.tick_font + 5,
+            fontsize=STYLE.corner_tag_font,  # Now using corner_tag_font instead of tick_font + 5
             bbox=dict(boxstyle="round,pad=0.25",
                       facecolor="white", edgecolor="none", alpha=0.9),
             zorder=99

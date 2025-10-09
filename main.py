@@ -13,8 +13,7 @@ import sys
 import subprocess
 from pathlib import Path
 
-# Configuration options - Edit these to control the script's behavior
-FORCE_ETL = True  # Set to True to force regeneration of the transformed data
+from settings import FIGURE_MODE, FORCE_ETL, FigureMode
 
 # Check for required databases
 def check_raw_databases(data_dir: Path) -> bool:
@@ -102,17 +101,69 @@ def run_figure_script(script_path, script_name):
         print(f"ERROR: Failed to generate {script_name}: {str(e)}")
         print("Continuing with next figure...")
 
-def generate_figures(project_root):
-    """Generate all four figures for the project."""
-    figure_scripts = [
-        ("Figure 1 (Platform)", project_root / "figures" / "figure_1_platform" / "main_fig1.py"),
-        ("Figure 2 (Theory)", project_root / "figures" / "figure_2_theory" / "main_figure_2.py"),
-        ("Figure 3 (Experiment)", project_root / "figures" / "figure_3_experiment" / "main_figure_3.py"),
-        ("Figure 4 (Metrics)", project_root / "figures" / "figure_4_metrics" / "main_figure_4.py")
-    ]
+# There is no small version of Figure 1, so both modes point to the same script.
+FIGURE_SCRIPT_CONFIG = [
+    {
+        "name": "Figure 1 (Platform)",
+        "large": Path("figures/large_figures/figure_1_platform/main_fig1.py"),
+        "small": Path("figures/large_figures/figure_1_platform/main_fig1.py"),
+    },
+    {
+        "name": "Figure 2 (Theory)",
+        "large": Path("figures/large_figures/figure_2_theory/main_figure_2.py"),
+        "small": Path("figures/small_figures/figure_2_theory/main.py"),
+    },
+    {
+        "name": "Figure 3 (Experiment)",
+        "large": Path("figures/large_figures/figure_3_experiment/main_figure_3.py"),
+        "small": Path("figures/small_figures/figure_3_experiment/main.py"),
+    },
+    {
+        "name": "Figure 4 (Metrics)",
+        "large": Path("figures/large_figures/figure_4_metrics/main_figure_4.py"),
+        "small": Path("figures/small_figures/figure_4_metrics/main.py"),
+    },
+]
 
-    for fig_name, script_path in figure_scripts:
-        run_figure_script(script_path, fig_name)
+
+def _coerce_figure_mode(mode_value) -> FigureMode:
+    """Normalize the figure mode value from project settings."""
+
+    if isinstance(mode_value, FigureMode):
+        return mode_value
+
+    try:
+        return FigureMode(str(mode_value).lower())
+    except ValueError:
+        print(
+            f"WARNING: Unrecognized figure mode '{mode_value}'."
+            " Defaulting to large figure rendering."
+        )
+        return FigureMode.LARGE
+
+
+def _select_script_path(project_root: Path, figure_mode: FigureMode, entry: dict) -> Path:
+    """Resolve the script path for a figure given the requested mode."""
+
+    if figure_mode == FigureMode.SMALL:
+        small_path = project_root / entry["small"]
+        if small_path.exists():
+            return small_path
+        print(
+            f"INFO: Small-mode script for {entry['name']} not found."
+            " Falling back to the large-figure script."
+        )
+
+    return project_root / entry["large"]
+
+
+def generate_figures(project_root: Path, figure_mode: FigureMode) -> None:
+    """Generate all project figures according to the configured mode."""
+
+    for entry in FIGURE_SCRIPT_CONFIG:
+        script_path = _select_script_path(project_root, figure_mode, entry)
+        run_figure_script(script_path, entry["name"])
+
 
 def main():
     """Main entry point for the EP-TPD Unification project."""
@@ -147,8 +198,9 @@ def main():
         print("Transformed data already exists. Skipping ETL pipeline.")
 
     # Step 3: Generate all figures
-    print("\nGenerating figures...")
-    generate_figures(project_root)
+    figure_mode = _coerce_figure_mode(FIGURE_MODE)
+    print(f"\nGenerating figures in {figure_mode.value} mode...")
+    generate_figures(project_root, figure_mode)
 
     print("\n"+"="*80)
     print("EP-TPD Unification Project Completed Successfully!")

@@ -74,7 +74,7 @@ matplotlib.rcParams.update({
 })
 
 # ──────────────────────────────────────────────────────────────────────
-DATA_LOCATION = Path("../../data/ep_tpd_transformed_data.db")
+DATA_LOCATION = Path("../../../data/ep_tpd_transformed_data.db")
 
 # ╭──────────────────────────────────────────────────────── experiment IDs
 #   Row 1 (φ = 0)
