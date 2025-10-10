@@ -14,8 +14,8 @@ from pathlib import Path
 import importlib
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patheffects as pe
 import matplotlib.ticker as mticker
+from matplotlib.ticker import FormatStrFormatter
 
 # -----------------------------------------------------------------------------
 # Repo imports
@@ -41,20 +41,20 @@ from fitting.peak_fitting import peak_location, eigenvalues  # noqa: E402
 # -----------------------------------------------------------------------------
 # Global figure controls (edit these)
 # -----------------------------------------------------------------------------
-FIGSIZE       = (13.5, 5.6)   # overall figure size
-WSPACE        = 0.40          # horizontal spacing between the two panels
+FIGSIZE       = (5*2.5, 5)   # overall figure size
+WSPACE        = 0.5          # horizontal spacing between the two panels
 HSPACE        = 0.20          # vertical spacing (unused for 1x2 but kept for symmetry)
-LEFT          = 0.08          # figure margin left
-RIGHT         = 0.96          # figure margin right
-TOP           = 0.98          # figure margin top
-BOTTOM        = 0.12          # figure margin bottom
+LEFT          = 0.085          # figure margin left
+RIGHT         = 0.99          # figure margin right
+TOP           = 0.97          # figure margin top
+BOTTOM        = 0.175          # figure margin bottom
 
-FS_LABEL      = 16            # axis label font size
-FS_TICKS      = 12            # tick label font size
-FS_LEGEND     = 16            # legend font size
-FS_CB_LABEL   = 14            # colorbar label font size
-FS_CORNER     = 12            # corner tag font size
-FS_PANEL_LAB  = 16            # (a), (b) font size
+FS_LABEL      = 26            # axis label font size
+FS_TICKS      = 20            # tick label font size
+FS_LEGEND     = 18            # legend font size
+FS_CB_LABEL   = 26            # colorbar label font size
+FS_CORNER     = 16            # corner tag font size
+FS_PANEL_LAB  = 28           # (a), (b) font size
 PANEL_LAB_WT  = "bold"
 PANEL_LAB_X   = -0.12         # offset in axes fraction for panel label x
 PANEL_LAB_Y   = 1.02          # offset in axes fraction for panel label y
@@ -62,8 +62,8 @@ PANEL_LAB_Y   = 1.02          # offset in axes fraction for panel label y
 LW_MAIN       = 2.0           # line width for main curves
 LW_REF        = 1.9           # line width for reference lines
 
-CB_GUTTER     = 0.012         # gap between left axes and colorbar axes (in figure coords)
-CB_WIDTH      = 0.016         # colorbar width (in figure coords)
+CB_GUTTER     = 0.01         # gap between left axes and colorbar axes (in figure coords)
+CB_WIDTH      = 0.01         # colorbar width (in figure coords)
 
 LEFT_XTICKS_N = 5             # number of x ticks on the left panel
 
@@ -85,37 +85,6 @@ SPLIT_EPS = 1e-10
 # -----------------------------------------------------------------------------
 # Helpers
 # -----------------------------------------------------------------------------
-def _corner_tag_no_tex(ax, phi: float, kappa_c: float, phi_only: bool = False) -> None:
-    """Corner tag helper that avoids LaTeX dependencies and uses small font."""
-    if np.isclose(phi, 0.0):
-        phi_txt = "0"
-    elif np.isclose(phi, np.pi):
-        phi_txt = r"\pi"
-    elif np.isclose(phi, np.pi / 2):
-        phi_txt = r"\pi/2"
-    else:
-        phi_txt = rf"{phi:.2g}"
-    kappa_txt = rf"{kappa_c:.3g}"
-    if phi_only:
-        tag_string = rf"$\phi = {phi_txt}$"
-    else:
-        tag_string = rf"$\phi = {phi_txt}$" + "\n" + rf"$\tilde \kappa_c = {kappa_txt}$"
-
-    text = ax.text(
-        0.97, 0.03, tag_string,
-        transform=ax.transAxes,
-        ha="right", va="bottom",
-        fontsize=FS_CORNER,
-        bbox=dict(boxstyle="round,pad=0.2", facecolor="white", edgecolor="none", alpha=0.85),
-        zorder=99,
-    )
-    text.set_path_effects([pe.withStroke(linewidth=0.6, foreground="black")])
-
-# replace the LaTeX-heavy taggers with the lightweight one
-mesh_nd.corner_tag = _corner_tag_no_tex
-abs_contours.corner_tag = _corner_tag_no_tex
-
-
 def _break_at_transitions(y: np.ndarray, split: np.ndarray, eps: float = 1e-12) -> np.ndarray:
     """Insert NaNs when the peak splitting toggles between zero and non-zero."""
     y = y.copy()
@@ -174,8 +143,8 @@ def _add_panel_labels(fig: plt.Figure, axes, labels=("a", "b"), fs=FS_PANEL_LAB,
     for ax, lab in zip(axes, labels):
         bbox = ax.get_position()
         fig.text(
-            bbox.x0 - 0.035,
-            bbox.y1 + 0.015,
+            bbox.x0 - 0.05,
+            bbox.y1 - 0.06,
             lab,
             fontsize=fs,
             fontweight=weight,
@@ -278,6 +247,7 @@ def build() -> Path:
     ax_right.tick_params(labelsize=FS_TICKS)
     ax_right.set_xlim(DELTA_F_RANGE)
     ax_right.set_ylim(-3.5, 3.5)
+    # mesh_nd.corner_tag(ax_right, PHI, KAPPA_TILDE_C)
 
     # Legend (deduped)
     handles, labels = ax_right.get_legend_handles_labels()
@@ -294,8 +264,12 @@ def build() -> Path:
     left_pos = ax_left.get_position()
     cax = fig.add_axes([left_pos.x1 + CB_GUTTER, left_pos.y0, CB_WIDTH, left_pos.height])
     cb = fig.colorbar(mappable, cax=cax)
-    cb.set_label("PF", fontsize=FS_CB_LABEL)
+    cb.set_label("PF (Clipped)", fontsize=FS_CB_LABEL)
     cb.ax.tick_params(labelsize=FS_TICKS)
+    vmin, vmax = mappable.get_clim()
+    vmin = max(1.0, vmin)
+    cb.set_ticks(np.linspace(vmin, vmax, 5))
+    cb.ax.yaxis.set_major_formatter(FormatStrFormatter("%.1f"))
 
     # Panel labels
     _add_panel_labels(fig, (ax_left, ax_right), labels=("a", "b"))

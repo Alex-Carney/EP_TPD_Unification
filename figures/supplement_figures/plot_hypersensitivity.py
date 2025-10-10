@@ -2,11 +2,14 @@
 """
 combined_ep_tpd_grid.py
 
-Top row: Perfect EP (left) and Imperfect EP (right) showing |Im(lambda_+)| and |Im(lambda_-)| vs Delta_kappa.
-Rows 2-4: TPD peak locations and splitting for Perfect, Imperfect, and Robust TPD scenarios.
+Rows 0-1: Perfect and imperfect EP. Column 0 plots the imaginary eigenvalue
+locations, column 1 plots their splitting.
+Rows 2-4: Perfect, imperfect, and robust TPD peak locations (column 0) and
+splitting (column 1).
 
-Styling, fonts, and reference lines are consistent across the full 4x2 figure.
-Row-specific x sweeps are used where needed. NaNs are inserted to break trajectories at teleport boundaries.
+Styling, fonts, and reference lines are consistent across the full 5x2 figure.
+Row-specific x sweeps are used where needed. NaNs are inserted to break
+trajectories at teleport boundaries.
 """
 
 from __future__ import annotations
@@ -20,6 +23,7 @@ if str(REPO_ROOT) not in sys.path:
 
 import numpy as np
 import matplotlib.pyplot as plt
+from typing import Optional, Tuple
 
 from fitting.transition_fitting import TPD_location
 from fitting.peak_fitting import eigenvalues
@@ -38,7 +42,8 @@ HILITE_COLOR = "forestgreen"  # highlight color used in TPD middle row
 
 FS_TICKS = 20
 FS_LABEL = 22
-FS_SCENARIO = 18
+PANEL_LABEL_FS = 27
+FS_SCENARIO = 20
 FS_MIN_TEXT = 20
 FS_LEGEND = 19
 
@@ -86,7 +91,7 @@ TPD_SCENARIOS = (
         "dk_sweep": DELTA_KAPPA_TOP,
     },
     {
-        "name": "Imperfect TPD",
+        "name": "TED",
         "description": r"$\tilde{\kappa}_c = 1.0$, $\tilde{\Delta}_f = 10^{-3}$",
         "phi": 0.0,
         "kappa_c": 1.0,
@@ -149,12 +154,17 @@ def simulate_tpd_row(phi: float, kappa_c: float, delta_f: float, dk_vals: np.nda
     splitting = nu_plus - nu_minus
     splitting[splitting < 0] = 0.0
 
+    slope_raw = np.gradient(splitting, dk_vals, edge_order=2)
+
     return {
         "delta_kappa": dk_vals,
         "nu_plus": _break_at_transitions(nu_plus, splitting),
         "nu_mid": _break_at_transitions(nu_mid, splitting),
         "nu_minus": _break_at_transitions(nu_minus, splitting),
         "splitting": _break_at_transitions(splitting, splitting),
+        "splitting_raw": splitting,
+        "slope": _break_at_transitions(slope_raw, splitting),
+        "slope_raw": slope_raw,
     }
 
 def tpd_location(phi: float, kappa_c: float) -> float:
@@ -164,6 +174,82 @@ def _format_common(ax):
     ax.axhline(0.0, color="lightgray", linewidth=1.0, linestyle="--", zorder=0)
     ax.tick_params(labelsize=FS_TICKS)
 
+def _sqrt_fit_curve(
+        ax: plt.Axes,
+        x_vals: np.ndarray,
+        y_vals: np.ndarray,
+        *,
+        base: Optional[float] = None,
+        span: float = 0.05,
+        color: str = "tab:orange",
+        label: str = r"Fit",
+        text_offset: Tuple[float, float] = (0.95, 0.9),
+        y_offset: float = 0.0,
+) -> Optional[dict]:
+    """Fit c * sqrt(x - base) to data near the onset and overlay on the axis."""
+    finite_mask = np.isfinite(x_vals) & np.isfinite(y_vals)
+    if not finite_mask.any():
+        return None
+    x = x_vals[finite_mask]
+    y = y_vals[finite_mask]
+
+    positive_mask = y > 1e-6
+    if not positive_mask.any():
+        return None
+    if base is None:
+        base = float(x[positive_mask][0])
+
+    current_span = span
+    for _ in range(5):
+        mask = (x >= base) & (x <= base + current_span)
+        if mask.sum() >= 8:
+            break
+        current_span *= 1.5
+    else:
+        return None
+
+    x_fit = x[mask]
+    y_fit = y[mask]
+    sqrt_term = np.sqrt(np.clip(x_fit - base, 0.0, None))
+    if np.allclose(sqrt_term, 0.0):
+        return None
+
+    denom = float(np.dot(sqrt_term, sqrt_term))
+    if denom == 0.0:
+        return None
+    y_work = y_fit - y_offset
+    coeff = float(np.dot(y_work, sqrt_term) / denom)
+    resid = y_work - coeff * sqrt_term
+    dof = max(len(y_fit) - 1, 1)
+    sigma_sq = float(np.dot(resid, resid) / dof / denom)
+    sigma = float(np.sqrt(max(sigma_sq, 0.0)))
+
+    ax.plot(
+        x_fit,
+        y_offset + coeff * sqrt_term,
+        color=color,
+        linewidth=3.0,
+        linestyle="--",
+        label=label,
+    )
+
+    txt = rf"$c = {coeff:.3f} \pm {sigma:.3f}$"
+    ax.text(
+        text_offset[0],
+        text_offset[1],
+        txt,
+        transform=ax.transAxes,
+        ha="right",
+        va="top",
+        fontsize=FS_SCENARIO,
+    )
+    return {
+        "c": coeff,
+        "sigma": sigma,
+        "x0": base,
+        "x_span": (x_fit[0], x_fit[-1]),
+    }
+
 # -----------------------------------------------------------------------------
 # Figure assembly
 # -----------------------------------------------------------------------------
@@ -172,61 +258,129 @@ def build():
     plt.rcParams["figure.facecolor"] = "white"
     plt.rcParams["axes.facecolor"] = "white"
 
-    # 4 rows x 2 cols: row 0 = EP, rows 1..3 = TPD
-    fig = plt.figure(figsize=(14, 16))
+    # 5 rows x 2 cols: rows 0-1 = EP, rows 2-4 = TPD
+    fig = plt.figure(figsize=(14, 18))
     gs = fig.add_gridspec(
-        nrows=4, ncols=2,
-        hspace=0.2, wspace=0.25,   # spacing between rows and columns
+        nrows=5, ncols=2,
+        hspace=0.24, wspace=0.25,   # spacing between rows and columns
         left=0.1, right=0.96,      # figure margins
         bottom=0.06, top=0.98
     )
 
-    axes = np.empty((4, 2), dtype=object)
+    axes = np.empty((5, 2), dtype=object)
 
-    # EP row (independent x scales)
-    axes[0, 0] = fig.add_subplot(gs[0, 0])
-    axes[0, 1] = fig.add_subplot(gs[0, 1])
+    # EP rows (each row shares x across its two columns)
+    for row in range(2):
+        ax_loc = fig.add_subplot(gs[row, 0])
+        ax_split = fig.add_subplot(gs[row, 1], sharex=ax_loc)
+        axes[row, 0] = ax_loc
+        axes[row, 1] = ax_split
 
-    # TPD rows. For each column, share x within the three TPD rows only.
+    # TPD rows. Share x within the top two TPD rows when sweeps match.
+    base_row2 = []
     for col in range(2):
-        ax1 = fig.add_subplot(gs[1, col])               # first TPD row in that column
-        ax2 = fig.add_subplot(gs[2, col], sharex=ax1)   # share x with ax1
-        ax3 = fig.add_subplot(gs[3, col])               # bottom TPD row has different sweep, do not share
-        axes[1, col] = ax1
-        axes[2, col] = ax2
-        axes[3, col] = ax3
+        base = fig.add_subplot(gs[2, col])
+        axes[2, col] = base
+        base_row2.append(base)
 
-    # ---------------- EP row ----------------
-    for col, sc in enumerate(EP_SCENARIOS):
-        ax = axes[0, col]
-        _format_common(ax)
+    for col in range(2):
+        axes[3, col] = fig.add_subplot(gs[3, col], sharex=base_row2[col])
+
+    for col in range(2):
+        base = fig.add_subplot(gs[4, col])
+        axes[4, col] = base
+
+# ---------------- EP rows ----------------
+    for row_idx, sc in enumerate(EP_SCENARIOS):
+        ax_loc = axes[row_idx, 0]
+        ax_split = axes[row_idx, 1]
+        _format_common(ax_loc)
+        _format_common(ax_split)
+
         plus_vals, minus_vals = eigenvalue_magnitudes(sc["delta_f"])
-        ax.plot(DELTA_KAPPA_EP, plus_vals, color=LINECOLOR_MAIN, linewidth=4.0, label=r"$\operatorname{Im}(\lambda)$")
-        ax.plot(DELTA_KAPPA_EP, minus_vals, color=LINECOLOR_MAIN, linewidth=4.0)
-        # reference line at EP in-range
-        ax.axvline(EP_POSITIONS[0], color=LINECOLOR_REF_EP, linewidth=2.0, label=r"$\tilde \Delta_\kappa^\text{EP}$")
-        ax.set_xlim(DELTA_KAPPA_EP[0], DELTA_KAPPA_EP[-1])
-        ax.set_ylabel(r"Frequency / J", fontsize=FS_LABEL)
+        splitting = np.abs(plus_vals - minus_vals)
 
-        # scenario label inside bottom-left
-        ax.text(0.02, 0.02, sc["name"] + "\n" + sc["subtitle"],
-                transform=ax.transAxes, ha="left", va="bottom", fontsize=FS_SCENARIO)
+        ax_loc.plot(
+            DELTA_KAPPA_EP,
+            plus_vals,
+            color=LINECOLOR_MAIN,
+            linewidth=4.0,
+            label=r"$\operatorname{Im}(\tilde{\lambda}_\pm)$",
+        )
+        ax_loc.plot(
+            DELTA_KAPPA_EP,
+            minus_vals,
+            color=LINECOLOR_MAIN,
+            linewidth=4.0,
+        )
 
-        # legend only on left EP panel
-        if col == 0:
-            ax.legend(loc="upper left", fontsize=FS_LEGEND, frameon=False)
+        ax_split.plot(
+            DELTA_KAPPA_EP,
+            splitting,
+            color=LINECOLOR_MAIN,
+            linewidth=4.0,
+        )
+
+        ep_label = r"$\tilde \Delta_\kappa^\text{EP}$" if row_idx == 0 else "_nolegend_"
+        for ax in (ax_loc, ax_split):
+            ax.axvline(
+                EP_POSITIONS[0],
+                color=LINECOLOR_REF_EP,
+                linewidth=2.5,
+                label=ep_label,
+            )
+
+        ax_loc.set_xlim(DELTA_KAPPA_EP[0], DELTA_KAPPA_EP[-1])
+        ax_split.set_xlim(DELTA_KAPPA_EP[0], DELTA_KAPPA_EP[-1])
+
+        ax_loc.set_ylabel(r"Frequency / J", fontsize=FS_LABEL)
+        ax_split.set_ylabel(
+            r"$\tilde{\Delta}_\lambda$",
+            fontsize=FS_LABEL,
+        )
+
+        ax_loc.text(
+            0.02,
+            0.02,
+            sc["name"] + "\n" + sc["subtitle"],
+            transform=ax_loc.transAxes,
+            ha="left",
+            va="bottom",
+            fontsize=FS_SCENARIO,
+        )
+
+        if row_idx == 0:
+            ax_loc.legend(loc="upper left", fontsize=FS_LEGEND, frameon=False)
+
+        fit = None
+        if row_idx != 1:
+            fit = _sqrt_fit_curve(
+                ax_split,
+                DELTA_KAPPA_EP,
+                splitting,
+                base=EP_POSITIONS[0],
+                span=0.03,
+                color="tab:orange",
+                label=None,
+                text_offset=(0.8, 0.85),
+            )
+        if row_idx == 0 or fit is None:
+            ax_split.set_xlim(DELTA_KAPPA_EP[0], DELTA_KAPPA_EP[-1])
+        else:
+            ax_split.set_xlim(fit["x0"], fit["x_span"][1])
 
     # x label only on the bottom row of the whole figure
     # so no x labels on EP row
 
     # ---------------- TPD rows ----------------
-    for row_idx, sc in enumerate(TPD_SCENARIOS, start=1):
+    for row_idx, sc in enumerate(TPD_SCENARIOS, start=2):
         dk_vals = sc["dk_sweep"]
         curves = simulate_tpd_row(sc["phi"], sc["kappa_c"], sc["delta_f"], dk_vals)
         nu_plus = curves["nu_plus"]
         nu_mid = curves["nu_mid"]
         nu_minus = curves["nu_minus"]
         splitting = curves["splitting"]
+        splitting_raw = curves["splitting_raw"]
         tpd_x = tpd_location(sc["phi"], sc["kappa_c"])
 
         # left column: peak locations (three roots)
@@ -249,16 +403,45 @@ def build():
         _format_common(ax_split)
         ax_split.plot(dk_vals, splitting, color=LINECOLOR_MAIN, linewidth=4.0)
         ax_split.axvline(tpd_x, color=LINECOLOR_REF, linewidth=2.0)
-        ax_split.set_xlim(dk_vals.min(), dk_vals.max())
         ax_split.set_ylabel(r"$\tilde{\Delta}_\nu$", fontsize=FS_LABEL)
 
+        fit_span = 0.02 if row_idx < 4 else 0.05
+        mask_pos = np.isfinite(splitting_raw) & (splitting_raw > 1e-6)
+        if np.any(mask_pos):
+            first_idx = int(np.nonzero(mask_pos)[0][0])
+            base_x = float(dk_vals[first_idx])
+        else:
+            base_x = float(tpd_x)
+        base_y = 0.0
+        text_offset = (0.95, 0.85)
+        if row_idx == 3 and np.any(mask_pos):
+            base_y = float(splitting_raw[mask_pos][0])
+            text_offset = (0.65, 0.85)
+
+        fit = _sqrt_fit_curve(
+            ax_split,
+            dk_vals,
+            splitting_raw,
+            base=base_x,
+            span=fit_span,
+            color="tab:orange",
+            label=None,
+            text_offset=text_offset,
+            y_offset=base_y,
+        )
+        if fit:
+            ax_split.set_xlim(fit["x0"], fit["x_span"][1])
+        else:
+            ax_split.set_xlim(dk_vals.min(), dk_vals.max())
+
         # legend only on the first TPD row
-        if row_idx == 1:
-            ax_loc.legend(loc="upper left", fontsize=FS_LEGEND, frameon=False, handles=[line_plus, line_minus, line_mid])
+        if row_idx == 2:
+            ax_loc.legend(loc="upper left", fontsize=FS_LEGEND, frameon=False, handles=[line_plus, line_minus, line_mid],
+                          bbox_to_anchor=(-0.02, 1.05))
             ax_split.legend(loc="upper left", fontsize=FS_LEGEND, frameon=False, handles=[line_tpd])
 
         # highlight min splitting only on the middle TPD row (Imperfect TPD)
-        if row_idx == 2:
+        if row_idx == 3:
             mask = np.isfinite(splitting) & (splitting > 0.0)
             if np.any(mask):
                 idxs = np.flatnonzero(mask)
@@ -274,19 +457,37 @@ def build():
                 cap = 0.001 * dk_vals.ptp()
                 ax_loc.hlines([y_lo, y_hi], dk0 - cap, dk0 + cap, color=HILITE_COLOR, linewidth=3.0)
                 ax_loc.text(dk0 + 0.005 * dk_vals.ptp(), y_mid,
-                            r"$\min(\tilde{\Delta}_\nu)$",
+                            r"$\tilde{\Delta}_\nu^\text{TED}$",
                             color='black', fontsize=FS_MIN_TEXT, va="center", ha="left")
 
                 # horizontal dashed line on right plot
                 ax_split.axhline(split_min, color=HILITE_COLOR, linestyle="--", linewidth=2.5,
-                                 label=r"$\min(\tilde{\Delta}_\nu)$")
+                                 label=r"$\tilde{\Delta}_\nu^\text{TED}$")
                 ax_split.legend(loc="upper left", fontsize=FS_LEGEND, frameon=False)
 
     # x labels only on the very bottom row
-    axes[3, 0].set_xlabel(r"$\tilde{\Delta}_\kappa$", fontsize=FS_LABEL)
-    axes[3, 1].set_xlabel(r"$\tilde{\Delta}_\kappa$", fontsize=FS_LABEL)
-
+    axes[4, 0].set_xlabel(r"$\tilde{\Delta}_\kappa$", fontsize=FS_LABEL)
+    axes[4, 1].set_xlabel(r"$\tilde{\Delta}_\kappa$", fontsize=FS_LABEL)
     fig.tight_layout(w_pad=2.6, h_pad=2.2)
+
+    # Panel labels a–j (five rows × two columns)
+    panel_labels = list("abcdefghij")
+    idx = 0
+    for row in range(5):
+        for col in range(2):
+            ax = axes[row, col]
+            letter = panel_labels[idx]
+            idx += 1
+            bb = ax.get_position()
+            fig.text(
+                bb.x0 - 0.05,
+                bb.y1 - 0.01,
+                letter,
+                fontsize=PANEL_LABEL_FS,
+                fontweight="bold",
+                ha="center",
+                va="bottom",
+            )
 
     out_dir = Path(__file__).resolve().parents[1] / ".figures"
     out_dir.mkdir(parents=True, exist_ok=True)

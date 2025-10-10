@@ -182,6 +182,7 @@ def build_single_column_figure(filename: str = "../../.figures/FIG_4_metrics_sma
     ax_phi0 = fig.add_subplot(grid[0, 0])
     _plot_splitting(ax_phi0, ROW_EXPS[0], 0.0)
     _apply_custom_x_labelpad(ax_phi0, is_top_row=True)
+    # ax_phi0.set_xlim([-3, 1])
 
     ax_phi_pi = fig.add_subplot(grid[0, 1])
     _plot_splitting(ax_phi_pi, ROW_EXPS[1], np.pi)
@@ -249,15 +250,15 @@ def build_single_column_figure(filename: str = "../../.figures/FIG_4_metrics_sma
 
     ax_max.set_xlabel(r"$\tilde{\kappa}_c$", fontsize=STYLE.label_font)
     ax_max.set_ylabel(r"$\max(\tilde\chi)$", fontsize=STYLE.label_font)
-    ax_max.legend(
-        handles=handles,
-        labels=labels,
-        fontsize=STYLE.theory_legend_font,
-        loc="upper right",
-        framealpha=1,
-        borderpad=0.1,
-        bbox_to_anchor=(1.0, 1.02),
-    )
+    # ax_max.legend(
+    #     handles=handles,
+    #     labels=labels,
+    #     fontsize=STYLE.theory_legend_font,
+    #     loc="upper right",
+    #     framealpha=1,
+    #     borderpad=0.1,
+    #     bbox_to_anchor=(1.0, 1.02),
+    # )
     ax_max.tick_params(labelsize=STYLE.tick_font)
 
     for axis in (ax_phi0, ax_phi_half, ax_phi_pi):

@@ -65,7 +65,7 @@ def build() -> Path:
     fig, axes = plt.subplots(
         nrows=1,
         ncols=3,
-        figsize=(18, 5.5),
+        figsize=(15, 5),
         sharex=False,
     )
 
@@ -163,6 +163,7 @@ def build() -> Path:
             loc="lower left",
             framealpha=1.0,
             borderpad=0.2,
+            bbox_to_anchor=(-0.025, -0.025)
         )
 
     fig.tight_layout()

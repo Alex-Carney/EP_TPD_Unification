@@ -5,8 +5,8 @@ import numpy as np
 class FigMetricStyle:
     tick_font     : int   = 18
     label_font    : int   = 22
-    legend_font   : int   = 1
-    theory_legend_font: int = 1
+    legend_font   : int   = 14
+    theory_legend_font: int = 14
     save_dpi      : int   = 400
 
     # colors / line-widths ------------------------------------------------
