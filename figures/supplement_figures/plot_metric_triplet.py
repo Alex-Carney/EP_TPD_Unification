@@ -113,6 +113,23 @@ def build() -> Path:
         if ylim is not None:
             ax.set_ylim(*ylim)
 
+    # Horizontal PF = 1 reference line on the middle (Petermann) panel
+    pf_ax = axes[1]
+    pf_line = pf_ax.axhline(
+        1.0,
+        color="gray",
+        linestyle="--",
+        linewidth=2.0,
+        label=r"$\mathrm{PF}=1$",
+    )
+    pf_ax.legend(
+        [pf_line],
+        [r"$\mathrm{PF}=1$"],
+        fontsize=STYLE.theory_legend_font,
+        frameon=False,
+        loc="upper right",
+    )
+
     if legend_handles:
         star_proxy = plt.Line2D(
             [0],

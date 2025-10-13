@@ -17,12 +17,12 @@ from sqlalchemy.orm import selectinload, sessionmaker
 CFG = {
     "figure_size": (9, 6),
     "grid": {
-        "left": 0.09,
+        "left": 0.08,
         "right": 0.98,
-        "bottom": 0.12,
+        "bottom": 0.125,
         "top": 0.98,
         "hspace": 0.32,
-        "wspace": 0.2,
+        "wspace": 0.27,
     },
     "fonts": {
         "font.family": "sans-serif",
@@ -36,13 +36,19 @@ CFG = {
     },
     "panel_labels": {
         "labels": ["(a)", "(b)", "(c)", "(d)"],
-        "fontsize": 12,
-        "x_offset": 0.045,
+        "fontsize": 20,
+        "x_offset_left": 0.075,
+        "x_offset_right": 0.102,
         "y_offset": 0.015,
         "color": "black",
     },
     "axis_spacing": {
         "top_subplot_x_labelpad": -7.0,  # Special padding just for the top subplot's x-axis label
+    },
+    "legend_kappas": {
+        0.0: (0.67, 1.96),
+        np.pi / 2.0: (1.30, 2.32),
+        np.pi: (0.83, 1.66),
     },
 }
 
@@ -123,11 +129,14 @@ def _compute_theory_curves(phi_values: Sequence[float], kappa_values: np.ndarray
     return petermann, strength, min_split, max_resp, ep_dist
 
 
-def _figure_text_label(fig: plt.Figure, ax: plt.Axes, text: str) -> None:
+def _figure_text_label(fig: plt.Figure, ax: plt.Axes, text: str, *, column_index: int | None = None) -> None:
     cfg = CFG["panel_labels"]
     bb = ax.get_position()
+    x_offset = cfg["x_offset_left"]
+    if column_index is not None and column_index == 1:
+        x_offset = cfg["x_offset_right"]
     fig.text(
-        bb.x0 - cfg["x_offset"],
+        bb.x0 - x_offset,
         bb.y1 + cfg["y_offset"],
         text,
         fontsize=cfg["fontsize"],
@@ -141,8 +150,9 @@ def _apply_panel_labels(fig: plt.Figure, axes: Sequence[plt.Axes]) -> None:
     labels = CFG["panel_labels"]["labels"]
     if len(labels) < len(axes):
         raise ValueError("Not enough labels configured for the displayed panels")
-    for text, ax in zip(labels, axes):
-        _figure_text_label(fig, ax, text)
+    for idx, (text, ax) in enumerate(zip(labels, axes)):
+        column_index = idx % 2
+        _figure_text_label(fig, ax, text, column_index=column_index)
 
 
 def build_single_column_figure(filename: str = "../../.figures/FIG_4_metrics_small.png") -> None:
@@ -150,7 +160,7 @@ def build_single_column_figure(filename: str = "../../.figures/FIG_4_metrics_sma
 
     all_ids = [exp_id for pair in ROW_EXPS for exp_id in pair]
     experiments = _fetch_experiments(all_ids)
-    _, _, _, max_resp, _ = _compute_theory_curves(PHI_SET, KAPPA_TILDE_C)
+    _, _, min_split, _, _ = _compute_theory_curves(PHI_SET, KAPPA_TILDE_C)
 
     fig = plt.figure(figsize=CFG["figure_size"])
     grid = GridSpec(
@@ -167,11 +177,13 @@ def build_single_column_figure(filename: str = "../../.figures/FIG_4_metrics_sma
 
     # Top row: (a) phi = 0 data, (b) phi = pi data
     def _plot_splitting(ax: plt.Axes, exp_ids: Sequence[str], phi: float) -> None:
+        target_kappas = CFG["legend_kappas"].get(phi)
         for exp_id in exp_ids:
             splitting_data_pane.plot_splitting_pane(
                 ax,
                 analyzed_experiment=experiments[exp_id],
                 phi=phi,
+                legend_kappas=target_kappas,
             )
 
     def _apply_custom_x_labelpad(ax: plt.Axes, is_top_row: bool = False):
@@ -182,17 +194,18 @@ def build_single_column_figure(filename: str = "../../.figures/FIG_4_metrics_sma
     ax_phi0 = fig.add_subplot(grid[0, 0])
     _plot_splitting(ax_phi0, ROW_EXPS[0], 0.0)
     _apply_custom_x_labelpad(ax_phi0, is_top_row=True)
-    # ax_phi0.set_xlim([-3, 1])
+    ax_phi0.set_xlim([-2.3, 0.8])
 
     ax_phi_pi = fig.add_subplot(grid[0, 1])
     _plot_splitting(ax_phi_pi, ROW_EXPS[1], np.pi)
     _apply_custom_x_labelpad(ax_phi_pi, is_top_row=True)
+    ax_phi_pi.set_xlim([1.65, 3.15])
 
     # Bottom-left: (c) phi = pi/2 data
     ax_phi_half = fig.add_subplot(grid[1, 0])
     _plot_splitting(ax_phi_half, ROW_EXPS[2], np.pi / 2.0)
 
-    # Bottom-right: (d) theory max-response
+    # Bottom-right: (d) theory min splitting
     ax_max = fig.add_subplot(grid[1, 1])
     for j, phi in enumerate(PHI_SET):
         if np.isclose(phi, 0.0):
@@ -202,8 +215,8 @@ def build_single_column_figure(filename: str = "../../.figures/FIG_4_metrics_sma
         else:
             label = r"$\phi=\pi$"
         col = STYLE.curve_color_map(phi)
-        ax_max.plot(KAPPA_TILDE_C, max_resp[j], color=col, lw=STYLE.curve_lw, label=label, zorder=THEORY_ZORDER)
-        metric_markers.scatter_metric_markers(ax_max, KAPPA_TILDE_C, max_resp[j], phi, col)
+        ax_max.plot(KAPPA_TILDE_C, min_split[j], color=col, lw=STYLE.curve_lw, label=label, zorder=THEORY_ZORDER)
+        metric_markers.scatter_metric_markers(ax_max, KAPPA_TILDE_C, min_split[j], phi, col)
 
     star_proxy = Line2D(
         [0],
@@ -249,7 +262,7 @@ def build_single_column_figure(filename: str = "../../.figures/FIG_4_metrics_sma
     labels.extend([r"Small $\tilde \kappa_c$", r"Large $\tilde \kappa_c$"])
 
     ax_max.set_xlabel(r"$\tilde{\kappa}_c$", fontsize=STYLE.label_font)
-    ax_max.set_ylabel(r"$\max(\tilde\chi)$", fontsize=STYLE.label_font)
+    ax_max.set_ylabel(r"$\min(\tilde\Delta_\nu)$", fontsize=STYLE.label_font)
     # ax_max.legend(
     #     handles=handles,
     #     labels=labels,

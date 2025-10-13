@@ -126,6 +126,7 @@ def plot_splitting_pane(
         *,
         include_legend: bool = True,
         include_data_label: bool = True,
+        legend_kappas: Optional[Tuple[float, float]] = None,
 ) -> None:
     """
     Draw the splitting pane for one experiment from ORM data.
@@ -181,6 +182,13 @@ def plot_splitting_pane(
 
     # decide labels and styles based on kappa_tilde_c proximity to STYLE target
 
+    if legend_kappas is not None:
+        small_label = rf"$\tilde \kappa_c = {legend_kappas[0]:.2f}$"
+        large_label = rf"$\tilde \kappa_c = {legend_kappas[1]:.2f}$"
+    else:
+        small_label = r"$\tilde \kappa_c^\mathrm{small}$"
+        large_label = r"$\tilde \kappa_c^\mathrm{large}$"
+
     star_value = FigMetricStyle.star_kappa[phi]
     tri_value = FigMetricStyle.tri_kappa[phi]
     is_small = abs(star_value - kappa_tilde_c) < abs(tri_value - kappa_tilde_c)
@@ -190,18 +198,18 @@ def plot_splitting_pane(
         theory_line_style = "-"
         min_splitting_line_style = "--"
         if np.isclose(phi, np.pi):
-            theory_label = r"Theory $\phi=\pi$"
+            theory_label = r"$\phi=\pi$"
 
         elif np.isclose(phi, np.pi/2.0):
-            theory_label = r"Theory $\phi=\pi/2$"
+            theory_label = r"$\phi=\pi/2$"
 
         elif np.isclose(phi, 0.0):
-            theory_label = r"Theory $\phi=0$"
+            theory_label = r"$\phi=0$"
 
         else:
             theory_label = r"Theory"
-        data_label = r"Small $\tilde \kappa_c$ (Data)"
-        min_splitting_label = r"$\min(\tilde \Delta _\nu)$"
+        data_label = small_label
+        min_splitting_label = r"$\tilde \Delta_\nu^\text{TED}$"
     else:
         marker_type = "^"
         marker_fill = "none"
@@ -209,7 +217,7 @@ def plot_splitting_pane(
         min_splitting_line_style = "--"
         theory_label = None
         min_splitting_label = None
-        data_label = r"Large $\tilde \kappa_c$ (Data)"
+        data_label = large_label
 
     theory_color = STYLE.theory_color_map(phi)
 

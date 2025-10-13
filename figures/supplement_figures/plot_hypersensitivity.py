@@ -24,6 +24,7 @@ if str(REPO_ROOT) not in sys.path:
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import Optional, Tuple
+from matplotlib.lines import Line2D
 
 from fitting.transition_fitting import TPD_location
 from fitting.peak_fitting import eigenvalues
@@ -47,11 +48,26 @@ FS_SCENARIO = 20
 FS_MIN_TEXT = 20
 FS_LEGEND = 19
 
+# Puiseux display configuration
+PUISEUX_CONFIG = {
+    "show_uncertainty": False,
+    "show_rms": False,
+    "text_offsets": {
+        "default": (0.92, 0.5),
+        "ep": (0.92, 0.5),
+        "ted": (0.92, 0.4),
+    },
+}
+
+# Puiseux expansion configuration: number of terms (>=1) to include per fit.
+# Terms progress as (x - x0)^(1/2), (x - x0)^(1), (x - x0)^(3/2), ...
+PUISSEUX_TERMS = 2
+
 # -----------------------------------------------------------------------------
 # EP row configuration (row 0)
 # -----------------------------------------------------------------------------
 PHI_EP = 0.0
-DELTA_KAPPA_EP = np.linspace(-2.025, -1.975, 4001)
+DELTA_KAPPA_EP = np.linspace(-2.025, -1.975, 50001)
 EP_POSITIONS = (-2.0 * J_COUPLING, 2.0 * J_COUPLING)  # draw left one only in-range
 
 EP_SCENARIOS = (
@@ -83,7 +99,7 @@ DELTA_KAPPA_BOTTOM = np.linspace(-0.05, 0.05, 10001)  # for Robust TPD row
 
 TPD_SCENARIOS = (
     {
-        "name": "Perfect TPD",
+        "name": "TPD",
         "description": r"$\tilde{\kappa}_c = 1.0$, $\tilde{\Delta}_f = 0$",
         "phi": 0.0,
         "kappa_c": 1.0,
@@ -174,7 +190,13 @@ def _format_common(ax):
     ax.axhline(0.0, color="lightgray", linewidth=1.0, linestyle="--", zorder=0)
     ax.tick_params(labelsize=FS_TICKS)
 
-def _sqrt_fit_curve(
+def _puiseux_powers(n_terms: int) -> np.ndarray:
+    """Return an array of Puiseux powers starting at 1/2 with step 1/2."""
+    n_terms = max(1, int(n_terms))
+    return np.array([0.5 * (i + 1) for i in range(n_terms)], dtype=float)
+
+
+def _puiseux_fit(
         ax: plt.Axes,
         x_vals: np.ndarray,
         y_vals: np.ndarray,
@@ -183,10 +205,11 @@ def _sqrt_fit_curve(
         span: float = 0.05,
         color: str = "tab:orange",
         label: str = r"Fit",
-        text_offset: Tuple[float, float] = (0.95, 0.9),
         y_offset: float = 0.0,
+        n_terms: int = 2,
+        text_key: str = "default",
 ) -> Optional[dict]:
-    """Fit c * sqrt(x - base) to data near the onset and overlay on the axis."""
+    """Fit a Puiseux series near the onset and overlay the fitted curve."""
     finite_mask = np.isfinite(x_vals) & np.isfinite(y_vals)
     if not finite_mask.any():
         return None
@@ -214,26 +237,67 @@ def _sqrt_fit_curve(
     if np.allclose(sqrt_term, 0.0):
         return None
 
-    denom = float(np.dot(sqrt_term, sqrt_term))
-    if denom == 0.0:
+    powers = _puiseux_powers(n_terms)
+    text_offsets = PUISEUX_CONFIG["text_offsets"]
+    text_offset = text_offsets.get(text_key, text_offsets.get("default", (0.95, 0.85)))
+    # Build design matrix with columns (x - base)^{power}
+    delta = np.clip(x_fit - base, 0.0, None)
+    design_columns = []
+    for p in powers:
+        design_columns.append(np.power(delta, p))
+    A = np.column_stack(design_columns)
+    # Remove columns that are entirely zero (outside span)
+    zero_cols = np.all(np.isclose(A, 0.0, atol=1e-12, rtol=0.0), axis=0)
+    nonzero_cols = np.logical_not(zero_cols)
+    if not np.any(nonzero_cols):
         return None
-    y_work = y_fit - y_offset
-    coeff = float(np.dot(y_work, sqrt_term) / denom)
-    resid = y_work - coeff * sqrt_term
-    dof = max(len(y_fit) - 1, 1)
-    sigma_sq = float(np.dot(resid, resid) / dof / denom)
-    sigma = float(np.sqrt(max(sigma_sq, 0.0)))
+    A = A[:, nonzero_cols]
+    effective_powers = powers[nonzero_cols]
 
-    ax.plot(
+    y_work = y_fit - y_offset
+    try:
+        coeffs, _, _, _ = np.linalg.lstsq(A, y_work, rcond=None)
+    except np.linalg.LinAlgError:
+        return None
+    fit_vals = y_offset + A @ coeffs
+
+    line_handle = ax.plot(
         x_fit,
-        y_offset + coeff * sqrt_term,
+        fit_vals,
         color=color,
         linewidth=3.0,
         linestyle="--",
         label=label,
-    )
+    )[0]
 
-    txt = rf"$c = {coeff:.3f} \pm {sigma:.3f}$"
+    resid = y_fit - fit_vals
+    dof = max(len(y_fit) - len(coeffs), 1)
+    sigma_sq = float(np.dot(resid, resid) / dof)
+    rms_resid = float(np.sqrt(max(sigma_sq, 0.0)))
+    try:
+        cov = sigma_sq * np.linalg.inv(A.T @ A)
+    except np.linalg.LinAlgError:
+        cov = np.full((len(coeffs), len(coeffs)), np.nan)
+
+    show_unc = PUISEUX_CONFIG.get("show_uncertainty", True)
+    show_rms = PUISEUX_CONFIG.get("show_rms", True)
+    lines = []
+    for idx, (power, coeff) in enumerate(zip(effective_powers, coeffs)):
+        sigma_i = float(np.sqrt(max(cov[idx, idx], 0.0))) if np.isfinite(cov[idx, idx]) else float("nan")
+        # Format exponent nicely: 1/2, 1, 3/2 ...
+        if abs(power - int(power)) < 1e-9:
+            exp_str = f"{int(power)}"
+        else:
+            numerator = int(round(power * 2))
+            exp_str = rf"{numerator}/2"
+        coeff_term = rf"$c_{{{exp_str}}} = {coeff:.1f}$"
+        if show_unc and np.isfinite(sigma_i):
+            coeff_term = rf"$c_{{{exp_str}}} = {coeff:.1f} \pm {sigma_i:.1f}$"
+        lines.append(coeff_term)
+    if show_rms:
+        lines.append(rf"$\mathrm{{RMS}} = {rms_resid:.1f}$")
+    txt = "\n".join(lines)
+
     ax.text(
         text_offset[0],
         text_offset[1],
@@ -244,10 +308,13 @@ def _sqrt_fit_curve(
         fontsize=FS_SCENARIO,
     )
     return {
-        "c": coeff,
-        "sigma": sigma,
+        "powers": effective_powers,
+        "coeffs": coeffs,
+        "cov": cov,
+        "rms": rms_resid,
         "x0": base,
         "x_span": (x_fit[0], x_fit[-1]),
+        "line_handle": line_handle,
     }
 
 # -----------------------------------------------------------------------------
@@ -352,22 +419,22 @@ def build():
         if row_idx == 0:
             ax_loc.legend(loc="upper left", fontsize=FS_LEGEND, frameon=False)
 
-        fit = None
-        if row_idx != 1:
-            fit = _sqrt_fit_curve(
+        if row_idx == 0:
+            fit_ep = _puiseux_fit(
                 ax_split,
                 DELTA_KAPPA_EP,
                 splitting,
                 base=EP_POSITIONS[0],
-                span=0.03,
+                span=0.01,
                 color="tab:orange",
                 label=None,
-                text_offset=(0.8, 0.85),
+                y_offset=0.0,
+                n_terms=1,
+                text_key="ep",
             )
-        if row_idx == 0 or fit is None:
-            ax_split.set_xlim(DELTA_KAPPA_EP[0], DELTA_KAPPA_EP[-1])
-        else:
-            ax_split.set_xlim(fit["x0"], fit["x_span"][1])
+            if fit_ep:
+                ax_split.legend([fit_ep["line_handle"]], ["Fit"], fontsize=FS_LEGEND, frameon=False, loc="upper left")
+        ax_split.set_xlim(DELTA_KAPPA_EP[0], DELTA_KAPPA_EP[-1])
 
     # x label only on the bottom row of the whole figure
     # so no x labels on EP row
@@ -396,7 +463,8 @@ def build():
 
         # scenario text bottom-left
         ax_loc.text(0.02, 0.02, sc["name"] + "\n" + sc["description"],
-                    transform=ax_loc.transAxes, ha="left", va="bottom", fontsize=FS_SCENARIO)
+                    transform=ax_loc.transAxes, ha="left", va="bottom", fontsize=FS_SCENARIO,
+                    color='black' if row_idx < 4 else 'crimson')
 
         # right column: splitting
         ax_split = axes[row_idx, 1]
@@ -410,15 +478,16 @@ def build():
         if np.any(mask_pos):
             first_idx = int(np.nonzero(mask_pos)[0][0])
             base_x = float(dk_vals[first_idx])
+            base_y = float(splitting_raw[first_idx])
         else:
             base_x = float(tpd_x)
-        base_y = 0.0
-        text_offset = (0.95, 0.85)
-        if row_idx == 3 and np.any(mask_pos):
-            base_y = float(splitting_raw[mask_pos][0])
-            text_offset = (0.65, 0.85)
-
-        fit = _sqrt_fit_curve(
+            base_y = 0.0
+        if row_idx == 2:
+            base_x = float(tpd_x)
+        if row_idx != 3:
+            base_y = 0.0
+        text_key = "ted" if row_idx == 3 else "default"
+        fit = _puiseux_fit(
             ax_split,
             dk_vals,
             splitting_raw,
@@ -426,13 +495,11 @@ def build():
             span=fit_span,
             color="tab:orange",
             label=None,
-            text_offset=text_offset,
             y_offset=base_y,
+            n_terms=PUISSEUX_TERMS if row_idx == 3 else 1,
+            text_key=text_key,
         )
-        if fit:
-            ax_split.set_xlim(fit["x0"], fit["x_span"][1])
-        else:
-            ax_split.set_xlim(dk_vals.min(), dk_vals.max())
+        ax_split.set_xlim(dk_vals.min(), dk_vals.max())
 
         # legend only on the first TPD row
         if row_idx == 2:
@@ -463,7 +530,26 @@ def build():
                 # horizontal dashed line on right plot
                 ax_split.axhline(split_min, color=HILITE_COLOR, linestyle="--", linewidth=2.5,
                                  label=r"$\tilde{\Delta}_\nu^\text{TED}$")
-                ax_split.legend(loc="upper left", fontsize=FS_LEGEND, frameon=False)
+        if row_idx == 3:
+            handles, labels = ax_split.get_legend_handles_labels()
+            entries = []
+            seen = set()
+            for h, l in zip(handles, labels):
+                if not l:
+                    continue
+                if l in seen:
+                    continue
+                seen.add(l)
+                entries.append((h, l))
+            if fit and np.any(np.isclose(fit["powers"], 1.0, atol=1e-6)):
+                pass
+                # lin_label = r"$c_{1}(\Delta\tilde\kappa - \tilde\Delta_\kappa^\mathrm{TED})$"
+                # linear_handle = Line2D([0, 1], [0, 1], color="tab:orange", linestyle=":", linewidth=3.0)
+                # entries.append((linear_handle, lin_label))
+            if entries:
+                handles_out, labels_out = zip(*entries)
+                ax_split.legend(handles_out, labels_out, fontsize=FS_LEGEND, frameon=False, loc="upper left")
+
 
     # x labels only on the very bottom row
     axes[4, 0].set_xlabel(r"$\tilde{\Delta}_\kappa$", fontsize=FS_LABEL)
