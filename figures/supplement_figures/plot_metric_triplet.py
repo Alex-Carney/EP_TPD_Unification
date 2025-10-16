@@ -165,13 +165,13 @@ def build() -> Path:
             markersize=STYLE.ref_ms**0.5,
             markeredgewidth=2.0,
             linestyle="None",
-            label=r"$\star$ Ref. 19",
+            label=r"$\star$ Ref. 18",
         )
         legend_handles.extend([star_proxy, tri_proxy, ref_proxy])
         legend_labels.extend([
             r"Small $\tilde{\kappa}_c$",
             r"Large $\tilde{\kappa}_c$",
-            r"Ref. 19 $\tilde{\kappa}_c$",
+            r"Ref. 18 $\tilde{\kappa}_c$",
         ])
         axes[0].legend(
             legend_handles,

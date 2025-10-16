@@ -61,7 +61,7 @@ CFG = {
         "y": 0.074,
         "width": 0.035,
         "height": 0.856,
-        "label": "PF (Clipped 90th Percentile)",
+        "label": "Petermann Noise Factor",
     },
     "legend": {                        # Global legend layout (top of page)
         "fontsize": 18,
@@ -111,8 +111,9 @@ PANE_LABELS = CFG["panel_label"]["text"]
 
 def _legend_handles() -> list[Line2D]:
     st = STYLE
-    marker_size = 7
-    edge_width = 1.6
+    marker_size = 13.5
+    edge_width = 3.5
+    contour_legend_lw = 4
     return [
         Line2D([], [], color=st.primary_ep_color,
                marker=st.primary_ep_marker, linestyle="none",
@@ -137,9 +138,9 @@ def _legend_handles() -> list[Line2D]:
                markerfacecolor="none",
                markersize=marker_size, markeredgewidth=edge_width,
                label=st.rogue_tpd_label),
-        Line2D([], [], color=st.q_color, ls=st.q_ls, lw=1.6, label=r"$\tilde q = 0$"),
-        Line2D([], [], color=st.split_col, ls=st.split_ls, lw=1.6, label="Disc = 0"),
-        Line2D([], [], color=st.stability_col, ls=st.stability_ls, lw=1.6,
+        Line2D([], [], color=st.q_color, ls=st.q_ls, lw=contour_legend_lw, label=r"$\tilde q = 0$"),
+        Line2D([], [], color=st.split_col, ls=st.split_ls, lw=contour_legend_lw, label="Disc = 0"),
+        Line2D([], [], color=st.stability_col, ls=st.stability_ls, lw=contour_legend_lw,
                label="Instability"),
     ]
 
