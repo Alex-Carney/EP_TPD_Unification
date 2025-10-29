@@ -87,6 +87,12 @@ The ETL pipeline performs:
 4. Theory data generation
 5. Transformation and storage of analyzed results
 
+**Important**: The results of the default settings (used in the paper) for the ETL 
+pipeline are already included in the `ep_tpd_transformed_data.db` file. You only need to run the ETL pipeline if you wish to change analysis parameters or reprocess the data.
+
+Note, reprocessing the data may take a long time depending on your system. On my system, it takes around 10-15 minutes while consuming
+up to 25 GB of RAM during peak usage.
+
 ## Figure Generation
 
 The `/figures` directory contains scripts to generate each figure from the paper:

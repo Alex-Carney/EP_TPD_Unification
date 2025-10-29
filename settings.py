@@ -15,4 +15,4 @@ class FigureMode(str, Enum):
 FIGURE_MODE: FigureMode = FigureMode.LARGE
 
 # Force the ETL pipeline to re-run even if transformed data already exists.
-FORCE_ETL: bool = False
+FORCE_ETL: bool = True
