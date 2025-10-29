@@ -3,8 +3,7 @@
 *.db-journal
 *.db-shm
 *.db-wal
-*.png
-.plots
 .figures
+.plots
 *~
 __pycache__

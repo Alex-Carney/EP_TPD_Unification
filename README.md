@@ -1,6 +1,37 @@
 # EP-TPD Unification Project
 
+## Quick Guide
+
+**Looking for the most relevant information? Here are some quick links:**
+
+If you're looking for:
+
+- **Further visual exploration of TPD/EP theory** Please visit this streamlit application (click "wake this app up" if it hasn't been used in a while): https://ep-tpd-educational-app.streamlit.app/  
+- **Individual trace fits**: To create debug traces (there are almost 2,000 of them) to look at raw trace fits, please run the ETL pipeline with `CAV_YIG_DEBUG = True` and `COUPLED_DEBUG = True` in `etl/settings.py`. The debug plots will be saved in `/.plots`. We can also supply these `.png` files upon request if you do not wish to re-run the ETL pipeline.
+- **Figures from the paper**:  See `/figures/small_figures` for scripts and settings to generate each figure from the paper main text. 
+- **Raw experimental data**: See [Data Files](#data-files) section below for download links from Dropbox. Note that all data is stored in `.sql` files as a **SQLite** database. See `/data` for more details. If you are comfortable with SQL, please see [Models](#models) section below for database schema and structure.
+- **Re-running data analysis**: See [ETL Pipeline](#etl-pipeline) section below for details on how to run the ETL pipeline to convert raw experimental data into analyzed experimental data, along with assumptions made and settings that you can change
+- **Symbolic computations and theory derivations**: See `/theory` for MATLAB symbolic scripts and outputs.
+- **Author Contact**: For questions or issues, please open an issue on GitHub or contact the corresponding author via email, at `alexander.s.carney.th@dartmouth.edu` or `mattias.w.fitzpatrick@dartmouth.edu`
+
+## Overview
+
 This repository contains the code to analyze experimental data and generate figures for the EP-TPD Unification research paper. The project processes raw experimental data from the cavity-magnon system, performs data analysis to identify exceptional points (EPs) and transmission peak degeneracies (TPDs), and generates publication-quality figures.
+
+## Contents
+
+- [Installation](#installation)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Data Files](#data-files)
+- [ETL Pipeline](#etl-pipeline)
+- [Figure Generation](#figure-generation)
+- [Customization](#customization)
+- [Models](#models)
+- [Fitting](#fitting)
+- [Dependencies](#dependencies)
+- [Theory](#theory)
+
 
 ## Installation
 
@@ -161,6 +192,12 @@ This project requires:
 - NumPy, SciPy, Matplotlib
 - SQLAlchemy for database operations
 - Pandas for data manipulation
+
+Please see `requirements.txt` for the full list of dependencies and their versions. In your Python environment, you can use
+```bash
+pip install -r requirements.txt
+```
+to install all required packages.
 
 ## Theory
 
