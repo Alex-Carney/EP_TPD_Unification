@@ -26,7 +26,7 @@ from metric_calculations import (
     splitting_strength_at_tpd_arc_2,
     min_split_over_J,
     calculate_max_response_tilde,
-    distance_between_ep_and_tpd,
+    thermal_noise_efficiency_at_tpd,
 )
 from splitting_data_pane import plot_splitting_pane
 from models.analysis import AnalyzedExperiment
@@ -51,22 +51,30 @@ DELTA_F_UNC   = 1.0e-5 / 1.0e-3
 DELTA_K_UNC   = 1.0e-5 / 1.0e-3
 THEORY_ZORDER = 20
 
+# f_tilde_c is expected to cancel for phi = 0, pi (and hopefully pi/2).
+F_TILDE_C_FOR_NE = 10.0
+
 n_phi, n_kappa = len(PHI_SET), KAPPA_TILDE_C.size
 petermann = np.empty((n_phi, n_kappa))
 strength  = np.empty_like(petermann)
 min_split = np.empty_like(petermann)
 max_resp  = np.empty_like(petermann)
-ep_dist   = np.empty_like(petermann)
+ne        = np.empty_like(petermann)
 
 # --------------- compute theory curves ---------------------------------
 for j, phi in enumerate(PHI_SET):
     for i, kappa_c in enumerate(KAPPA_TILDE_C):
         tpd = standard_tpd_locations(phi, kappa_c, left_tpd=LEFT_TPD_ONLY)
-        ep_dist  [j, i] = distance_between_ep_and_tpd(phi, kappa_c, left_tpd=LEFT_TPD_ONLY)
         petermann[j, i] = petermann_factor_at_tpd(tpd, phi)
         strength [j, i] = splitting_strength_at_tpd_arc_2(phi, kappa_c, left_tpd=LEFT_TPD_ONLY)
         min_split[j, i] = min_split_over_J(phi, kappa_c, DELTA_F_UNC, DELTA_K_UNC, left_tpd=LEFT_TPD_ONLY)
         max_resp [j, i] = calculate_max_response_tilde(strength[j, i], min_split[j, i])
+        ne[j, i] = thermal_noise_efficiency_at_tpd(
+            tpd,
+            phi,
+            kappa_c,
+            f_tilde_c=F_TILDE_C_FOR_NE,
+        )
 
 # --------------- fetch experiments once --------------------------------
 engine = create_engine(f"sqlite:///{DATA_LOCATION}")
@@ -96,12 +104,17 @@ EXP_MAP = _fetch_experiments_by_id(ALL_IDS)
 fig = plt.figure(figsize=(18, 12))
 outer = gridspec.GridSpec(
     3, 2,
-    left=0.055, right=0.97, bottom=0.068, top=0.975,
-    hspace=0.265, wspace=0.15, width_ratios=[1, 1]
+    left=0.065, right=0.99, bottom=0.08, top=0.98,
+    hspace=0.35, wspace=0.15, width_ratios=[1, 1.15]
 )
 
-def two_side(parent):
-    inner = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=parent, wspace=0.3)
+def two_side(parent, *, wspace=0.35, width_ratios=(1.0, 1.0)):
+    inner = gridspec.GridSpecFromSubplotSpec(
+        1, 2,
+        subplot_spec=parent,
+        wspace=wspace,                 # small gap inside the right mini-pairs
+        width_ratios=width_ratios,     # relative widths of the two mini-panels
+    )
     return fig.add_subplot(inner[0, 0]), fig.add_subplot(inner[0, 1])
 
 # --------------- Row-0 --------------------------------------------------
@@ -140,7 +153,7 @@ filled_star_proxy = Line2D([0], [0], marker="*", color="none",
 
 handles, labels = ax_max.get_legend_handles_labels()
 handles.extend([star_proxy, tri_proxy, filled_star_proxy])
-labels.extend([r"Small $\tilde \kappa_c$", r"Large $\tilde \kappa_c$", r"Ref. 19 $\tilde \kappa_c$"])
+labels.extend([r"Small $\tilde \kappa_c$", r"Large $\tilde \kappa_c$"])
 
 ax_max.set_xlabel(r"$\tilde{\kappa}_c$", fontsize=STYLE.label_font)
 ax_max.set_ylabel(r"$\max(\tilde\chi)$", fontsize=STYLE.label_font)
@@ -178,34 +191,45 @@ ax_split_pi = fig.add_subplot(outer[1, 0])
 for exp_id in ROW_EXPS[1]:
     plot_splitting_pane(ax_split_pi, analyzed_experiment=EXP_MAP[exp_id], phi=PHI_SET[1])
 
-# right = theory (EP-distance & Petermann)
-ax_dist, ax_pet = two_side(outer[2, 1])
+# right = theory (NE & Petermann)
+ax_ne, ax_pet = two_side(outer[2, 1])
 for j, phi in enumerate(PHI_SET):
     col = STYLE.curve_color_map(phi)
-    ax_dist.plot(KAPPA_TILDE_C, ep_dist  [j], color=col, lw=STYLE.curve_lw, zorder=THEORY_ZORDER)
-    ax_pet .plot(KAPPA_TILDE_C, petermann[j], color=col, lw=STYLE.curve_lw, zorder=THEORY_ZORDER)
-    scatter_metric_markers(ax_dist, KAPPA_TILDE_C, ep_dist  [j], phi, col)
-    scatter_metric_markers(ax_pet , KAPPA_TILDE_C, petermann[j], phi, col)
-ax_dist.set_ylabel(r"$\text{dist}_2(\mathrm{EP\!-\!TPD})$", fontsize=STYLE.label_font)
-ax_dist.set_xlabel(r"$\tilde{\kappa}_c$", fontsize=STYLE.label_font)
+
+    if np.isclose(phi, np.pi):
+        mask = KAPPA_TILDE_C > 0.0
+        ax_ne.plot(KAPPA_TILDE_C[mask], ne[j, mask], color=col, lw=STYLE.curve_lw, zorder=THEORY_ZORDER)
+        scatter_metric_markers(ax_ne, KAPPA_TILDE_C[mask], ne[j, mask], phi, col)
+    else:
+        ax_ne.plot(KAPPA_TILDE_C, ne[j], color=col, lw=STYLE.curve_lw, zorder=THEORY_ZORDER)
+        scatter_metric_markers(ax_ne, KAPPA_TILDE_C, ne[j], phi, col)
+
+    ax_pet.plot(KAPPA_TILDE_C, petermann[j], color=col, lw=STYLE.curve_lw, zorder=THEORY_ZORDER)
+    scatter_metric_markers(ax_pet, KAPPA_TILDE_C, petermann[j], phi, col)
+
+ax_ne.set_ylabel(r"NE(TPD)", fontsize=STYLE.label_font)
+ax_ne.set_xlabel(r"$\tilde{\kappa}_c$", fontsize=STYLE.label_font)
+ax_ne.set_ylim(0.0, 10.0)
+
 ax_pet.set_xlabel(r"$\tilde{\kappa}_c$", fontsize=STYLE.label_font)
-ax_pet .set_ylabel(r"PF(TPD)", fontsize=STYLE.label_font)
+ax_pet.set_ylabel(r"PF(TPD)", fontsize=STYLE.label_font)
 ax_pet.set_ylim(0.75, 5.0)
-for a in (ax_dist, ax_pet):
+
+for a in (ax_ne, ax_pet):
     a.tick_params(labelsize=STYLE.tick_font)
 
 # --------------- panel letters -----------------------------------------
 def _panel_label(ax: plt.Axes, letter: str) -> None:
     bb = ax.get_position()
-    fig.text(bb.x0 - 0.045, bb.y1 + .0125, letter, fontsize=28, fontweight="bold", va="top", ha="left")
+    fig.text(bb.x0 - 0.0625, bb.y1 + .012, letter, fontsize=28, fontweight="bold", va="top", ha="left")
 
 _left_axes = (ax_split_0, ax_split_pi2, ax_split_pi)
-for lbl, ax in zip(("A", "C", "B"), _left_axes):
+for lbl, ax in zip(("(a)", "(c)", "(b)"), _left_axes):
     _panel_label(ax, lbl)
-_panel_label(ax_max, "D")
+_panel_label(ax_max, "(d)")
 
 # --------------- roman numerals (right-hand column) ---------------------
-right_axes = (ax_max, ax_str, ax_min, ax_dist, ax_pet)
+right_axes = (ax_max, ax_str, ax_min, ax_ne, ax_pet)
 right_tags = ("i", "ii", "iii", "iv", "v")
 for tag, ax in zip(right_tags, right_axes):
     ax.text(0.015, 0.98, tag, transform=ax.transAxes, ha="left", va="top", fontsize=22, fontweight="bold")

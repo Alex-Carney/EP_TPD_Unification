@@ -2,7 +2,7 @@ import numpy as np
 
 def phase_peak_theory_color_map(phi):
     if phi == 0.0:
-        return "darkblue"
+        return "royalblue"
     elif np.isclose(phi, np.pi):
         return "purple"
     elif np.isclose(phi, np.pi/2):

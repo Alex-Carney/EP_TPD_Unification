@@ -6,7 +6,7 @@ from dataclasses import dataclass
 class FigTheoryStyle:
 
     # Paper: 2501 (takes a while)
-    GRID_SIZE = 251
+    GRID_SIZE = 2501
 
     tick_font     : int = 24
     label_font    : int = 34

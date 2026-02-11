@@ -35,7 +35,7 @@ CFG = {
         "axes.titlesize": 11,
         "xtick.labelsize": 10.5,
         "ytick.labelsize": 10.5,
-        "legend.fontsize": 8,
+        "legend.fontsize": 10,
 
         "xtick.major.pad": 1.0,
         "ytick.major.pad": 1.0,
@@ -45,17 +45,18 @@ CFG = {
     },
     "panel_label": {
         "fontsize": 13.5,
-        "x": 0.1,
+        "x": 0.04,
         "y": 0.96,
         "pathwidth": 1.2,
         "color": "black",
+        "fontweight": "bold",
     },
     "data_markers": {
         "marker": "o",
         "size": 3.0,
-        "facecolor": "black",
+        "facecolor": "none",
         "edgecolor": "black",
-        "errorbar_lw": 0.6,
+        "errorbar_lw": 0.8,
     },
     "imag_linewidth": 1.5,
     "peak_linewidth": 1.5,
@@ -92,7 +93,7 @@ EXP2_R = "47809d5e-9041-456b-80d8-becf48bf1cfd"
 EXP3_L = "25e2d559-5960-48c9-8cd2-9441cc067b61"
 EXP3_R = "3ef835ef-e2be-4eb3-929e-3a5149a00e87"
 
-LEFT_X_LIMS = (-2.25, 1.0)
+LEFT_X_LIMS = (-2.95, 1.15)
 LEFT_Y_FREQ_LIM = (-1.05, 1.05)
 RIGHT_X_LIMS = (0.95, 3.0)
 RIGHT_Y_FREQ_LIM = (-1.5, 1.0)
@@ -111,6 +112,7 @@ PANEL_SPECS = [
              {"key": "instability_line", "label": r"$\tilde \Delta_\kappa^\mathrm{NL}$"},
          ],
          "loc": "lower left",
+         "bbox_to_anchor": (-0.0275, -0.0225),
      }
 
 
@@ -120,11 +122,11 @@ PANEL_SPECS = [
      "xlims": LEFT_X_LIMS, "ylims": LEFT_Y_FREQ_LIM, "draw_unstable": True, "include_legend": False,
      "legend": {
          "entries": [
-             {"key": "nu_data", "label": r"$\tilde \nu_\pm$ Data"},
-             {"key": "nu_theory", "label": r"$\tilde \nu_\pm$ Theory"},
+             {"key": "nu_theory", "label": r"$\tilde \nu_\pm$ ($\phi = 0$)"},
              {"key": "imag_eigs", "label": r"$|\mathrm{Im}( \tilde \lambda_\pm)|$"},
          ],
          "loc": "lower left",
+        "bbox_to_anchor": (-0.0275, -0.0225),
      }
      },
     {"label": "(c)", "exp_id": EXP2_L, "phi": np.pi,     "phi_text": "\pi",   "size_text": "Small",
@@ -138,6 +140,7 @@ PANEL_SPECS = [
              {"key": "instability_line", "label": r"$\tilde \Delta_f^\mathrm{NL}$"},
          ],
          "loc": "lower left",
+"bbox_to_anchor": (-0.0275, -0.0225),
      }
 
 
@@ -148,9 +151,11 @@ PANEL_SPECS = [
 
      "legend": {
          "entries": [
-             {"key": "nu_theory", "label": r"$\tilde \nu_\pm$ Theory"},
+{"key": "nu_data", "label": r"$\tilde \nu_\pm$ Data"},
+             {"key": "nu_theory", "label": r"$\tilde \nu_\pm$ ($\phi = \pi$)"},
          ],
          "loc": "lower left",
+"bbox_to_anchor": (-0.0275, -0.0225),
      }
 
      },
@@ -164,6 +169,7 @@ PANEL_SPECS = [
              {"key": "ep_line", "label": r"$\tilde \Delta_\kappa^\mathrm{EP}$"},
          ],
          "loc": "lower left",
+"bbox_to_anchor": (-0.0275, -0.0225),
      }
 
      },
@@ -173,9 +179,10 @@ PANEL_SPECS = [
 
      "legend": {
          "entries": [
-             {"key": "nu_theory", "label": r"$\tilde \nu_\pm$ Theory"},
+             {"key": "nu_theory", "label": r"$\tilde \nu_\pm$ ($\phi = \pi/2$)"},
          ],
          "loc": "lower left",
+"bbox_to_anchor": (-0.0275, -0.0225),
      }
 
      },
@@ -288,11 +295,21 @@ def _theory_peaks(exp: AnalyzedExperiment, spec: dict) -> tuple[np.ndarray, np.n
 def _label_panel(ax: plt.Axes, text: str) -> None:
     cfg = CFG["panel_label"]
     ax.text(
-        cfg["x"], cfg["y"], text,
+        cfg["x"],
+        cfg["y"],
+        text,
         transform=ax.transAxes,
         fontsize=cfg["fontsize"],
+        fontweight=cfg["fontweight"],
         color=cfg["color"],
-        ha='left', va='top',
+        ha='left',
+        va='top',
+        bbox={
+            "facecolor": "white",
+            "edgecolor": "none",
+            "boxstyle": "square,pad=0.1",
+            "alpha": 0.7,  # <--- Add this line here (0.0 to 1.0)
+        },
     )
 
 
@@ -373,6 +390,7 @@ def _apply_panel_legend(ax: plt.Axes, spec: dict, *, peak_color: str) -> None:
 
     legend_kwargs = {
         "loc": legend_cfg.get("loc", "lower left"),
+        "bbox_to_anchor": legend_cfg.get("bbox_to_anchor", None),
         "fontsize": legend_cfg.get("fontsize", CFG["fonts"]["legend.fontsize"]),
         "framealpha": legend_cfg.get("framealpha", 1.0),
         "borderpad": legend_cfg.get("borderpad", 0.15),
@@ -462,6 +480,7 @@ def build_single_column_figure(filename: str = "../../.figures/FIG_3_experiment_
 
     output_path = Path(filename)
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    print(f"Saving figure to: {output_path.as_posix()}")
     fig.savefig(output_path, dpi=1000, facecolor="white")
     plt.close(fig)
 

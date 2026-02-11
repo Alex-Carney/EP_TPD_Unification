@@ -94,32 +94,34 @@ def eigenvalue_magnitudes(delta_f: float) -> tuple[np.ndarray, np.ndarray]:
 # -----------------------------------------------------------------------------
 # TPD rows configuration (rows 1-3)
 # -----------------------------------------------------------------------------
-DELTA_KAPPA_TOP = np.linspace(-0.85, -0.80, 10001)  # for Perfect and Imperfect TPD rows
+DELTA_KAPPA_TOP = np.linspace(-0.8, -0.70, 10001)  # for Perfect and Imperfect TPD rows
 DELTA_KAPPA_BOTTOM = np.linspace(-0.05, 0.05, 10001)  # for Robust TPD row
+
+DELTA_F_SWEEP = np.linspace(0.003, 0.003, 10001)
 
 TPD_SCENARIOS = (
     {
         "name": "TPD",
         "description": r"$\tilde{\kappa}_c = 1.0$, $\tilde{\Delta}_f = 0$",
         "phi": 0.0,
-        "kappa_c": 1.0,
-        "delta_f": 0.0,
+        "kappa_c": 1.12,
+        "delta_f": 0.0 * np.ones_like(DELTA_KAPPA_TOP),
         "dk_sweep": DELTA_KAPPA_TOP,
     },
     {
         "name": "TED",
         "description": r"$\tilde{\kappa}_c = 1.0$, $\tilde{\Delta}_f = 10^{-3}$",
         "phi": 0.0,
-        "kappa_c": 1.0,
-        "delta_f": 1e-3,
+        "kappa_c": 1.12,
+        "delta_f": DELTA_F_SWEEP,
         "dk_sweep": DELTA_KAPPA_TOP,
     },
     {
         "name": "Robust TPD",
         "description": r"$\tilde{\kappa}_c = 2.0$, $\tilde{\Delta}_f = 10^{-3}$",
         "phi": 0.0,
-        "kappa_c": 2.0,
-        "delta_f": 1e-3,
+        "kappa_c": 2,
+        "delta_f": 1e-3 * np.ones_like(DELTA_KAPPA_BOTTOM),
         "dk_sweep": DELTA_KAPPA_BOTTOM,
     },
 )
@@ -157,14 +159,14 @@ def _all_roots(delta_f: float, delta_kappa: float, kappa_c: float, phi: float) -
         return np.array([real_roots[0], real_roots[0], real_roots[1]])
     return real_roots[:3]
 
-def simulate_tpd_row(phi: float, kappa_c: float, delta_f: float, dk_vals: np.ndarray) -> dict[str, np.ndarray]:
+def simulate_tpd_row(phi: float, kappa_c: float, df_vals: np.ndarray, dk_vals: np.ndarray) -> dict[str, np.ndarray]:
     """Compute all three roots and the splitting for a TPD sweep."""
     nu_plus = np.full_like(dk_vals, np.nan, dtype=float)
     nu_mid = np.full_like(dk_vals, np.nan, dtype=float)
     nu_minus = np.full_like(dk_vals, np.nan, dtype=float)
 
-    for idx, delta_kappa in enumerate(dk_vals):
-        roots = _all_roots(delta_f, delta_kappa, kappa_c, phi)
+    for idx, (delta_kappa, df_val) in enumerate(zip(dk_vals, df_vals)):
+        roots = _all_roots(df_val, delta_kappa, kappa_c, phi)
         nu_minus[idx], nu_mid[idx], nu_plus[idx] = roots
 
     splitting = nu_plus - nu_minus
@@ -521,9 +523,9 @@ def build():
 
                 # vertical bracket on left plot
                 ax_loc.vlines(dk0, y_lo, y_hi, color=HILITE_COLOR, linewidth=3.0)
-                cap = 0.001 * dk_vals.ptp()
+                cap = 0.001 * np.ptp(dk_vals)
                 ax_loc.hlines([y_lo, y_hi], dk0 - cap, dk0 + cap, color=HILITE_COLOR, linewidth=3.0)
-                ax_loc.text(dk0 + 0.005 * dk_vals.ptp(), y_mid,
+                ax_loc.text(dk0 + 0.005 * np.ptp(dk_vals), y_mid,
                             r"$\tilde{\Delta}_\nu^\text{TED}$",
                             color='black', fontsize=FS_MIN_TEXT, va="center", ha="left")
 

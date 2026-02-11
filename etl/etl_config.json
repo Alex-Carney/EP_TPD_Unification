@@ -1,7 +1,8 @@
 {
   "cab5729f-0491-41f9-9fc8-acf0096754ab": {
     "phi_value": 0.0,
-    "J_value": 1.045e6,
+    "J_value": 1.05e6,
+    "J_err": 12988,
     "a0_guess": 4.4625e+15,
     "readout_type": "nr",
     "frequency_limits": {
@@ -29,7 +30,8 @@
   },
   "62156c79-a18b-4c96-b4b5-2a43519d1900": {
     "phi_value": 0.0,
-    "J_value": 1.045e6,
+    "J_value": 1.05e6,
+    "J_err": 12988,
     "a0_guess": 4.4625e+15,
     "readout_type": "normal",
     "frequency_limits": {
@@ -57,7 +59,8 @@
   },
   "02f5e503-3e4e-4651-9ef8-d90104b3721f": {
     "phi_value": 3.14159265358979,
-    "J_value": 1.125e6,
+    "J_value": 1.12e6,
+    "J_err": 22755,
     "a0_guess": 4.4625e+15,
     "readout_type": "nr",
     "frequency_limits": {
@@ -85,7 +88,8 @@
   },
   "47809d5e-9041-456b-80d8-becf48bf1cfd": {
     "phi_value": 3.14159265358979,
-    "J_value": 1.125e6,
+    "J_value": 1.12e6,
+    "J_err": 22755,
     "a0_guess": 4.4625e+15,
     "readout_type": "normal",
     "frequency_limits": {
@@ -114,6 +118,7 @@
   "3ef835ef-e2be-4eb3-929e-3a5149a00e87": {
     "phi_value": 1.5707963267949,
     "J_value": 0.95e6,
+    "J_err": 17802,
     "a0_guess": 4.4625e+15,
     "readout_type": "nr",
     "frequency_limits": {
@@ -142,6 +147,7 @@
   "25e2d559-5960-48c9-8cd2-9441cc067b61": {
     "phi_value": 1.5707963267949,
     "J_value": 0.95e6,
+    "J_err": 17802,
     "a0_guess": 4.4625e+15,
     "readout_type": "nr",
     "frequency_limits": {

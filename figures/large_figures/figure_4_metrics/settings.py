@@ -3,31 +3,33 @@ import numpy as np
 
 @dataclass(frozen=True)
 class FigMetricStyle:
-    tick_font     : int   = 18
-    label_font    : int   = 22
-    legend_font   : int   = 15
-    theory_legend_font: int = 17
-    save_dpi      : int   = 300
+    tick_font     : int   = 19
+    label_font    : int   = 31
+    legend_font   : int   = 25
+    theory_legend_font: int = 30
+    save_dpi      : int   = 400
 
     # colors / line-widths ------------------------------------------------
-    curve_lw      : float = 3.0
-    theory_lw     : float = 3.0
-    min_split_lw  : float = 3.0
+    curve_lw      : float = 5
+    theory_lw     : float = 5
+    min_split_lw  : float = 5
 
     data_marker   : str   = "o"
     data_color    : str   = "black"
     error_color   : str   = "black"
-    data_ms       : int   = 10
+    data_ms       : int   = 16
+    data_lw       : float = 3
 
     min_split_color : str = "black"   # dashed h-line
 
     # per-phase colours (match left column curves)
+    # USE THE SAME COLORS AS FIGURE 3!!!!
     def curve_color_map(self, phi: float) -> str:
         if np.isclose(phi, 0.0):
             return "royalblue"
         if np.isclose(phi, np.pi/2):
-            return "darkorange"
-        return "forestgreen"
+            return "darkgreen"
+        return "purple"
 
     def theory_color_map(self, phi: float) -> str:
         return self.curve_color_map(phi)   # reuse
@@ -48,9 +50,9 @@ class FigMetricStyle:
         0.0: 0.137
     }
 
-    star_ms   : int   = 220
-    tri_ms    : int   = 220
-    ref_ms: int = 220 * 2
+    star_ms   : int   = 400
+    tri_ms    : int   = 400
+    ref_ms: int = 0
 
 
 STYLE = FigMetricStyle()

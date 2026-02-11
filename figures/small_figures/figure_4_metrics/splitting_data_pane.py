@@ -27,7 +27,7 @@ from metric_markers import scatter_metric_markers
 from models.analysis import AnalyzedExperiment, TheoryDataPoint, AnalyzedAggregateTrace
 
 # --------------------------------------------------------------------------
-ERROR_BAR_FACTOR = 5
+ERROR_BAR_FACTOR = 1
 HLINE_ZORDER     = 5
 DATA_ZORDER      = 6
 THEORY_ZORDER    = 7

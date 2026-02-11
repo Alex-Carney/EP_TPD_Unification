@@ -7,6 +7,7 @@ class ETLConfig:
     # Experiment parameters, fit parameters
     phi_value: float
     J_value: float
+    J_err: float
     a0_guess: float
 
     readout_type: str
@@ -47,5 +48,6 @@ def load_config(config_path: str, config_name: str = "default") -> ETLConfig:
         phi_value=cfg["phi_value"],
         readout_type=cfg["readout_type"],
         J_value=cfg["J_value"],
+        J_err=cfg["J_err"],
         a0_guess=cfg["a0_guess"]
     )

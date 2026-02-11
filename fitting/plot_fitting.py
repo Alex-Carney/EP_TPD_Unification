@@ -168,7 +168,10 @@ def plot_coupled_trace_with_model(
     txt = [
         rf"$J = {fit_outcome.J:.6g} \pm {fit_outcome.J_err:.2g}$",
         rf"$\chi_r^2 = {fit_outcome.redchi:.2f}$",
-        rf"$\chi_r^2$ Norm = {fit_outcome.redchi_normalized:.2f}",
+        # Guard added here:
+        (rf"$\chi_r^2$ Norm = {fit_outcome.redchi_normalized:.2f}"
+         if fit_outcome.redchi_normalized is not None
+         else r"$\chi_r^2$ Norm = N/A"),
         rf"$\phi = {fit_outcome.phi:.6g} \pm {fit_outcome.phi_err:.2g}$",
     ]
     # Only add extra_info lines if extra_info is not None

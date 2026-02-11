@@ -12,6 +12,7 @@ from errors.data_integrity_error import DataIntegrityError
 from errors.data_load_error import DataLoadError
 from etl.etl_config import ETLConfig, load_all_configs
 from etl.settings import ETLSettings
+from fitting.filter_outliers import filter_outliers
 from fitting.model_fitting import CoupledFitOutcome
 from fitting.transition_fitting import EP_location, TPD_location, instability_location
 from models.analysis import TheoryDataPoint
@@ -118,15 +119,7 @@ def main():
                     delta_f=delta_f, delta_kappa=delta_kappa,
                     phi=expr_config.phi_value, n_starts=100,
                     current=iv_value, maxfev=100000, a0_guess=4.4625e+15,
-                    fit_phi=settings.FREE_PHI, vertical_offset=False
-                ) if not settings.FREE_J else fit.fit_coupled_trace(
-                    data_freqs, data_power_normalized,
-                    f_c=cavity_fit.f0, kappa_c=cavity_fit.kappa,
-                    delta_f=delta_f, delta_kappa=delta_kappa,
-                    phi=expr_config.phi_value, n_starts=100,
-                    current=iv_value, maxfev=100000, a0_guess=4.4625e+15,
-                    fit_phi=settings.FREE_PHI, vertical_offset=False,
-                    J_bounds=(expr_config.J_value * 0.5, expr_config.J_value * 1.5), initial_J=expr_config.J_value
+                    vertical_offset=False
                 )
 
                 ###
@@ -140,8 +133,9 @@ def main():
                 # Propagation of uncertainty for peak locations, must use Monte Carlo
                 means = dict(J=coupled_fit.J, phi=coupled_fit.phi, kappa_c=cavity_fit.kappa,
                     f_c=cavity_fit.f0, delta_f=delta_f, delta_kappa=delta_kappa)
+                # J_err is defined in the config
                 sigmas = dict(
-                    J=coupled_fit.J_err, phi=coupled_fit.phi_err if coupled_fit.phi != 0 else 0, kappa_c=cavity_fit.kappa_err,
+                    J=expr_config.J_err, phi=coupled_fit.phi_err if coupled_fit.phi != 0 else 0, kappa_c=cavity_fit.kappa_err,
                     f_c=cavity_fit.f0_err, delta_f=delta_f_err, delta_kappa=delta_kappa_err)
                 peak_stats = peaks.peak_location_mc(means, sigmas, n_draws=settings.MONTE_CARLO_SHOTS)
                 means = [peak_stats["mean"] for peak_stats in peak_stats.values()]
@@ -182,14 +176,16 @@ def main():
                         "kappa_err_c": cavity_fit.kappa_err, "Delta_f": delta_f, "Delta_f_err": delta_f_err,
                         "Delta_kappa": delta_kappa, "Delta_kappa_err": delta_kappa_err,
                     }
-                    # calculate the eigenvalues here, ensure stability
-                    # is gpt on?
-                    # provide a suggestion to calculate the eigenvalues here, ensure stability
 
                     is_unstable = np.any(np.real(peaks.eigenvalues(J=coupled_fit.J, kappa_c=cavity_fit.kappa,f_c=cavity_fit.f0,delta_f=delta_f,delta_kappa=delta_kappa,phi=expr_config.phi_value)) > 0)
                     plot_fit.plot_coupled_trace_with_model(data_freqs, data_power_normalized, coupled_fit, title=f"Coupled Fit for {exp.experiment_id} at {iv_value}",
                                                            save_path=os.path.join(debug_folder, f"coupled_{iv_value}.png"), voltage=iv_value, found_peaks=peak_locations,
                                                            found_peaks_maxima=maxes, found_peaks_minima=mins, extra_info=extra_info_dict, is_unstable=is_unstable)
+            # Outliers
+            if settings.TOSS_OUTLIERS:
+                print(f"Filtering outliers for {exp.experiment_id} (Pre-filter count: {len(exp_traces)})")
+                exp_traces = filter_outliers(exp_traces, settings)
+                print(f"Count after filtering: {len(exp_traces)}")
 
             # Now that all the Traces are analyzed, find Experiment-wide results
             f_c_vals = [t.f_c_Hz for t in exp_traces]
@@ -200,12 +196,13 @@ def main():
             Delta_kappa_vals = [t.Delta_kappa_Hz for t in exp_traces]
 
             # Get EP, TPD, and Instability locations
-            J_val = np.mean(J_vals)
-            phi_val = np.mean(phi_vals)
-            kappa_c_val = np.mean(kappa_c_vals)
+            J_val = float(np.mean(J_vals))
+            phi_val = float(np.mean(phi_vals))
+            kappa_c_val = float(np.mean(kappa_c_vals))
+            f_c_val_avg = float(np.mean(f_c_vals))  # Helper for below
 
             # Get the Theory results
-            theory_df, theory_dk, theory_results_nu_plus, theory_results_nu_minus = theory.simulate_theory(
+            theory_df, theory_dk, theory_results_nu_plus, theory_results_nu_minus, theory_fy, theory_ky = theory.simulate_theory(
                 phi=expr_config.phi_value, df=Delta_f_vals, dk=Delta_kappa_vals,
                 J_avg=J_val, fc_avg=np.mean(f_c_vals), kc_avg=kappa_c_val,
                 settings=settings
@@ -232,19 +229,42 @@ def main():
                 )
             ]
 
+            ep_loc = EP_location(phi_val, J_val)
+            raw_tpd_loc = TPD_location(phi_val, kappa_c_val, J_val)
+            # edge case for hyperbolic TPD returned by np roots
+            tpd_loc = float(np.ravel(raw_tpd_loc)[0]) if raw_tpd_loc is not None else None
+            inst_loc = instability_location(phi_val, kappa_c_val, J_val)
+
             analyzed_expr = AnalyzedExperiment(
                 analyzed_experiment_id=exp.experiment_id,
                 independent_variable=ind_name,
-                J_avg=J_val, J_std=np.std(J_vals), kappa_c_avg=kappa_c_val,
-                kappa_c_std=np.std(kappa_c_vals), f_c_avg=np.mean(f_c_vals), f_c_std=np.std(f_c_vals),
-                phi_avg=phi_val, phi_std=np.std(phi_vals),
-                Delta_kappa_avg=np.mean(Delta_kappa_vals), Delta_kappa_std=np.std(Delta_kappa_vals),
-                Delta_kappa_min=np.min(Delta_kappa_vals), Delta_kappa_max=np.max(Delta_kappa_vals),
-                Delta_f_min=np.min(Delta_f_vals), Delta_f_max=np.max(Delta_f_vals),
-                Delta_f_avg=np.mean(Delta_f_vals), Delta_f_std=np.std(Delta_f_vals),
-                EP_location=EP_location(phi_val, J_val),
-                TPD_location=TPD_location(phi_val, kappa_c_val, J_val),
-                Instability_location=instability_location(phi_val, kappa_c_val, J_val),
+
+                # CAST MEANS
+                J_avg=J_val,
+                kappa_c_avg=kappa_c_val,
+                f_c_avg=f_c_val_avg,
+                phi_avg=phi_val,
+                Delta_kappa_avg=float(np.mean(Delta_kappa_vals)),
+                Delta_f_avg=float(np.mean(Delta_f_vals)),
+
+                # CAST STANDARD DEVIATIONS
+                J_std=float(np.std(J_vals)),
+                kappa_c_std=float(np.std(kappa_c_vals)),
+                f_c_std=float(np.std(f_c_vals)),
+                phi_std=float(np.std(phi_vals)),
+                Delta_kappa_std=float(np.std(Delta_kappa_vals)),
+                Delta_f_std=float(np.std(Delta_f_vals)),
+
+                # CAST MIN/MAX
+                Delta_kappa_min=float(np.min(Delta_kappa_vals)),
+                Delta_kappa_max=float(np.max(Delta_kappa_vals)),
+                Delta_f_min=float(np.min(Delta_f_vals)),
+                Delta_f_max=float(np.max(Delta_f_vals)),
+
+                # CAST LOCATIONS (Handle None for instability)
+                EP_location=float(ep_loc) if ep_loc is not None else None,
+                TPD_location=float(tpd_loc) if tpd_loc is not None else None,
+                Instability_location=float(inst_loc) if inst_loc is not None else None,
             )
             analyzed_expr.analyzed_aggregate_traces = exp_traces
             analyzed_expr.theory_data_points = theory_data_points

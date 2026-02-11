@@ -20,8 +20,8 @@ from models.analysis import AnalyzedExperiment, TheoryDataPoint, AnalyzedAggrega
 
 LEGEND_FONT_SIZE = 13
 
-VERT_W                           = 2.0
-BASE_LINEWIDTH          = 2.5
+VERT_W = 2.0
+BASE_LINEWIDTH = 2.5
 
 # ----------------------------------------------------------------------
 def forgotten_special_lines(ax, x_vals, phi_val, kappa_tilde_c):
@@ -165,7 +165,7 @@ def plot_big_pane(
     #         peaks[col] = peaks[col] / scale
 
 
-    ERROR_BAR_FACTOR = 5
+    ERROR_BAR_FACTOR = 1
     err_low_nu_plus = nu_plus_mean - nu_plus_err_low
     err_high_nu_plus = nu_plus_err_high - nu_plus_mean
     yerr_scaled_nu_plus = [np.maximum(err_low_nu_plus, 0.0) * ERROR_BAR_FACTOR,

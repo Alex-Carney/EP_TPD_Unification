@@ -162,6 +162,7 @@ def build_figure():
     plt.close(fig)
 
     fig.savefig(output_path, dpi=400)
+    print('saved figure to', output_path)
     plt.close(fig)
 
 # ────────────────────────────────────────────────────────────────────────────

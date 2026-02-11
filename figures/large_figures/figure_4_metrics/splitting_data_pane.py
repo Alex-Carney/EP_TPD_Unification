@@ -27,7 +27,7 @@ from metric_markers import scatter_metric_markers
 from models.analysis import AnalyzedExperiment, TheoryDataPoint, AnalyzedAggregateTrace
 
 # --------------------------------------------------------------------------
-ERROR_BAR_FACTOR = 5
+ERROR_BAR_FACTOR = 1
 HLINE_ZORDER     = 5
 DATA_ZORDER      = 6
 THEORY_ZORDER    = 7
@@ -111,7 +111,6 @@ def _split_data_from_models(
     if not x_vals:
         return np.array([]), np.array([]), np.zeros((2, 0))
 
-    # Preserve original order. Do not sort. Your axis logic controls ranges.
     return (
         np.asarray(x_vals),
         np.asarray(split_vals),
@@ -220,7 +219,7 @@ def plot_splitting_pane(
             color=theory_color,
             markerfacecolor=marker_fill,
             markeredgewidth=1.25,
-            linewidth=2,
+            linewidth=STYLE.data_lw,
             zorder=DATA_ZORDER,
             label=data_label if include_data_label else None,
         )
@@ -253,16 +252,16 @@ def plot_splitting_pane(
         xmin_hline = max(x_min, x_tpd - radius)
         xmax_hline = min(x_max, x_tpd + radius)
 
-        ax.hlines(
-            y=min_split_tilde,
-            xmin=xmin_hline,
-            xmax=xmax_hline,
-            color=STYLE.min_split_color,
-            linestyle=min_splitting_line_style,
-            linewidth=STYLE.min_split_lw,
-            zorder=HLINE_ZORDER,
-            label=min_splitting_label if include_legend else None,
-        )
+        # ax.hlines(
+        #     y=min_split_tilde,
+        #     xmin=xmin_hline,
+        #     xmax=xmax_hline,
+        #     color=STYLE.min_split_color,
+        #     linestyle=min_splitting_line_style,
+        #     linewidth=STYLE.min_split_lw,
+        #     zorder=HLINE_ZORDER,
+        #     label=min_splitting_label if include_legend else None,
+        # )
 
     ax.set_xlabel(x_lab, fontsize=STYLE.label_font)
     ax.set_ylabel(r"$\tilde \Delta_\nu$", fontsize=STYLE.label_font)
@@ -271,14 +270,16 @@ def plot_splitting_pane(
     # match your old ylim tweak for phi=pi/2 only
     if np.isclose(phi, np.pi/2.0):
         y_min, y_max = ax.get_ylim()
+        x_min, x_max = ax.get_xlim()
+        ax.set_xlim(x_min, -0.25)
         ax.set_ylim(y_min, y_max + 0.2 * y_max)
 
     if np.isclose(phi, np.pi):
-        ax.set_xlim(1.9, 3.3)
+        ax.set_xlim(2, 3.2)
         ax.set_ylim(-.2, 2.1)
 
     if np.isclose(phi, 0):
-        ax.set_xlim(-1.5, .75)
+        ax.set_xlim(-1.2, .9)
 
     if include_legend:
         ax.legend(fontsize=STYLE.legend_font, framealpha=1.0, loc="upper left",

@@ -15,21 +15,12 @@ class ETLSettings:
     # If TRUE, will generate all traces for coupled mode (Default: True, Paper: False)
     COUPLED_DEBUG = True
 
-    # if TRUE, will treat phi as a free parameter in the fit (Default: False, Paper: False)
-    FREE_PHI = False
-
-    # if TRUE, will treat J as a free parameter in the fit (Default: False, Paper: False)
-    FREE_J = False
-
     # if TRUE, will normalize data to avoid ill-conditioned fits (Default: True, Paper: True)
     NORMALIZE_DATA = True
 
     # if TRUE, will inflate covariances by multiplying by normalized Chi_R^2 (how well the model fits the amplitude data) (Default: False, Paper: False)
     # We kept this False because most of the time Chi_R^2 normalized is < 1, which would shrink the covariance matrix.
     INFLATE_COV = False
-
-    # Multiply all error bars by this factor (Default: 5.0, Paper: 5.0)
-    ERROR_BAR_SCALE_FACTOR = 5.0
 
     # Theory size (WARNING: This gets stored in the DB, do not make this too large) (Default: 2500, Paper: 2500)
     THEORY_SIZE = 2500

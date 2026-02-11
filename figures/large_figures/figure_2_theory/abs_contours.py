@@ -33,11 +33,9 @@ def plot(ax: plt.Axes,
     unstable = np.ma.masked_where(~mesh.unstable, data)
 
     im = ax.contourf(mesh.G, mesh.D, stable, 50,
-                     cmap=STYLE.cmap,
-                     vmin=1, vmax=pclip)
+                     cmap=STYLE.cmap,)
     ax.contourf(mesh.G, mesh.D, unstable, 50,
-                cmap=STYLE.gray_cmap,
-                vmin=1, vmax=pclip)
+                cmap=STYLE.gray_cmap,)
 
     # --- contour lines -------------------------------------------------
     ax.contour(mesh.G, mesh.D, mesh.diff_real - mesh.thresh_real,

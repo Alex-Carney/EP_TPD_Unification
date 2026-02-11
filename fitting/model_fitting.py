@@ -1,15 +1,6 @@
 """
 mpfit.py — v0.6  (baseline-free, optional phi fit)
 
-Changes from v0.5
------------------
-* No baseline terms anywhere (already true since v0.5).
-* `fit_coupled_trace` now has keyword `fit_phi` (default False).
-    • If `fit_phi=False`  →  phi is fixed to the value you pass.
-    • If `fit_phi=True`   →  phi becomes a third fitted parameter.
-* `CoupledFitOutcome` now always carries `phi` and `phi_err`
-  (phi_err = 0.0 when phi is fixed).
-
 Public helpers
 --------------
     fit_cavity_trace
@@ -33,7 +24,6 @@ __all__ = [
     "yig_response",
     "fit_cavity_trace",
     "fit_yig_trace",
-    "fit_coupled_trace",
     "FitOutcome",
     "CoupledFitOutcome",
 ]
@@ -139,7 +129,7 @@ def _fit_single_resonance(
     for _ in range(n_starts - 1):
         guesses.append((
             a0 * _RNG.uniform(0.5, 1.5),
-            f00 + _RNG.normal(scale=0.2 * fd.ptp()),
+            f00 + _RNG.normal(scale=0.2 * np.ptp(fd)),
             kappa0 * _RNG.uniform(0.3, 3.0),
         ))
 
@@ -264,11 +254,10 @@ def fit_coupled_trace_fixed_J(
         delta_f: float,
         delta_kappa: float,
         phi: float = 0.0,
-        fit_phi: bool = False,
         vertical_offset: bool = False,
         fit_in_db: bool = False,
         n_starts: int = 8,
-        phi_bounds: Tuple[float, float] = (0.0, 2 * np.pi),
+        # phi_bounds removed as it is no longer fitting
         maxfev: int = 30_000,
         a0_guess: Optional[float] = None,
         current: Optional[float] = None,
@@ -279,36 +268,24 @@ def fit_coupled_trace_fixed_J(
 
     a0 = float(np.nanmax(y_lin)) if a0_guess is None else a0_guess
     b0 = float(np.percentile(y_lin, 5))
-    n_par = 1 + int(fit_phi) + int(vertical_offset)
+
+    # n_par is now only dependent on vertical_offset (a is always 1 param)
+    n_par = 1 + int(vertical_offset)
 
     guesses = []
     for _ in range(n_starts):
         a_guess = a0 * _RNG.uniform(0.5, 1.5)
-        phi_guess = phi + _RNG.normal(scale=0.5)
         b_guess = b0 * _RNG.uniform(0.5, 1.5)
-        if fit_phi and vertical_offset:
-            guesses.append((a_guess, phi_guess, b_guess))
-        elif fit_phi:
-            guesses.append((a_guess, phi_guess))
-        elif vertical_offset:
+
+        if vertical_offset:
             guesses.append((a_guess, b_guess))
         else:
             guesses.append((a_guess,))
 
     core = _coupled_core
-    if fit_phi and vertical_offset:
-        def model(x, a, phi_var, b):
-            return a * core(x, J, f_c, kappa_c, delta_f, delta_kappa, phi_var) + b
 
-        lower = (0.0, phi_bounds[0], 0.0)
-        upper = (np.inf, phi_bounds[1], np.inf)
-    elif fit_phi:
-        def model(x, a, phi_var):
-            return a * core(x, J, f_c, kappa_c, delta_f, delta_kappa, phi_var)
-
-        lower = (0.0, phi_bounds[0])
-        upper = (np.inf, phi_bounds[1])
-    elif vertical_offset:
+    # Model definitions now assume fixed Phi
+    if vertical_offset:
         def model(x, a, b):
             return a * core(x, J, f_c, kappa_c, delta_f, delta_kappa, phi) + b
 
@@ -321,7 +298,8 @@ def fit_coupled_trace_fixed_J(
         lower = (0.0,)
         upper = (np.inf,)
 
-    best, best_loss = None, np.inf
+    best_popt, best_pcov, best_loss = None, None, np.inf
+
     for p0 in guesses:
         try:
             with warnings.catch_warnings():
@@ -333,47 +311,41 @@ def fit_coupled_trace_fixed_J(
                     maxfev=maxfev,
                 )
         except Exception as e:
-            print(f"[WARN] Fit failed with exception: {e}")
+            # print(f"[WARN] Fit failed with exception: {e}")
             continue
 
-        if not np.all(np.isfinite(np.diag(pcov))):
-            print("[WARN] Covariance matrix is not finite, skipping")
+        if pcov is None or not np.all(np.isfinite(np.diag(pcov))):
+            # print("[WARN] Covariance matrix is not finite, skipping")
             continue
 
         pred = model(fd, *popt)
         loss = _loss(dbm if fit_in_db else y_lin, pred)
 
         if loss < best_loss:
-            best_loss, best = loss, (popt, pcov)
+            best_loss = loss
+            best_popt = popt
+            best_pcov = pcov
 
-    if best is None:
+    if best_popt is None:
         raise RuntimeError(f"coupled fit failed (no solution) at sweep value: {current}")
 
-    popt, pcov = best
-    perr = np.sqrt(np.diag(pcov))
+    perr = np.sqrt(np.diag(best_pcov))
 
+    # Unpack results
     idx = 0
-    a_fit, a_err = popt[idx], perr[idx];
+    a_fit, a_err = best_popt[idx], perr[idx]
     idx += 1
 
-    if fit_phi:
-        phi_fit, phi_err = popt[idx], perr[idx];
-        idx += 1
-    else:
-        phi_fit, phi_err = phi, 0.0
+    # Phi is strictly fixed
+    phi_fit, phi_err = phi, 0.0
 
     if vertical_offset:
-        b_fit, b_err = popt[idx], perr[idx]
+        b_fit, b_err = best_popt[idx], perr[idx]
     else:
         b_fit, b_err = 0.0, 0.0
 
     dof = max(1, len(fd) - n_par)
-    model_lin = model(fd, *popt)
-
-    if not np.all(np.isfinite(model_lin)):
-        print("[ERROR] model_lin contains NaNs or infs")
-    if not np.all(np.isfinite(y_lin)):
-        print("[ERROR] y_lin contains NaNs or infs")
+    model_lin = model(fd, *best_popt)
 
     resid = y_lin - model_lin
     chi2 = float(np.sum(resid ** 2))
@@ -388,179 +360,12 @@ def fit_coupled_trace_fixed_J(
         J=J, J_err=0.0,
         phi=phi_fit, phi_err=phi_err,
         b=b_fit, b_err=b_err,
-        chi2=chi2, redchi=redchi, pcov=pcov * redchi,
+        chi2=chi2, redchi=redchi, pcov=best_pcov * redchi,
         model_curve=model_lin if not fit_in_db else _to_db(model_lin),
         fit_ok=np.all(perr > 0) and np.all(np.isfinite(perr)),
         redchi_normalized=redchi_normalized,
-        inflated_pcov=redchi * pcov
+        inflated_pcov=redchi * best_pcov
     )
-
-
-def fit_coupled_trace(
-        fd: Sequence[float],
-        power_dbm: Sequence[float],
-        *,
-        f_c: float,
-        kappa_c: float,
-        delta_f: float,
-        delta_kappa: float,
-        phi: float = 0.0,
-        fit_phi: bool = False,
-        vertical_offset: bool = False,
-        initial_J: Optional[float] = None,
-        fit_in_db: bool = False,
-        n_starts: int = 8,
-        # ------ hard bounds passed to the optimiser -----------------
-        J_bounds: Tuple[float, float] = (0.0, np.inf),
-        phi_bounds: Tuple[float, float] = (0.0, 2 * np.pi),
-        # ------ *post-selection* window you want to keep ------------
-        reported_J_bounds: Tuple[float, float] | None = None,
-        # ------------------------------------------------------------
-        maxfev: int = 30_000,
-        a0_guess: Optional[float] = None,
-        current: Optional[float] = None,  # only used in error message
-) -> CoupledFitOutcome:
-    """
-    If *reported_J_bounds* is given, any trial whose best-fit Ĵ lies outside
-    that interval is discarded even when it satisfies the wider optimiser
-    bounds.  This lets you:
-
-        1.  keep the optimiser box wide (better convergence);
-        2.  still reject solutions you consider unphysical.
-    """
-    # -----------------------------------------------------------------
-    fd = np.asarray(fd, dtype=float)
-    dbm = np.asarray(power_dbm, dtype=float)
-    y_lin = 10.0 ** (dbm / 10.0)
-
-    # ---------- default reported window = optimiser box --------------
-    if reported_J_bounds is None:
-        reported_J_bounds = J_bounds
-    keep_lo, keep_hi = reported_J_bounds
-
-    # ---------- heuristics & seeds -----------------------------------
-    if initial_J is None:
-        initial_J = max(abs(delta_f) / 2.0, kappa_c / 4.0)
-
-    a0 = float(np.nanmax(y_lin)) if a0_guess is None else a0_guess
-    b0 = float(np.percentile(y_lin, 5))
-    n_par = 2 + int(fit_phi) + int(vertical_offset)
-
-    guesses = []
-    for _ in range(n_starts):
-        a_guess = a0 * _RNG.uniform(0.5, 1.5)
-        J_guess = initial_J * _RNG.uniform(0.3, 3.0)
-        phi_guess = phi + _RNG.normal(scale=0.5)
-        b_guess = b0 * _RNG.uniform(0.5, 1.5)
-        if fit_phi and vertical_offset:
-            guesses.append((a_guess, J_guess, phi_guess, b_guess))
-        elif fit_phi:
-            guesses.append((a_guess, J_guess, phi_guess))
-        elif vertical_offset:
-            guesses.append((a_guess, J_guess, b_guess))
-        else:
-            guesses.append((a_guess, J_guess))
-
-    # ---------- choose model & bounds --------------------------------
-    core = _coupled_core
-    if fit_phi and vertical_offset:
-        def model(x, a, J, phi_var, b):
-            return a * core(x, J, f_c, kappa_c,
-                            delta_f, delta_kappa, phi_var) + b
-
-        lower = (0.0, J_bounds[0], phi_bounds[0], 0.0)
-        upper = (np.inf, J_bounds[1], phi_bounds[1], np.inf)
-    elif fit_phi:
-        def model(x, a, J, phi_var):
-            return a * core(x, J, f_c, kappa_c,
-                            delta_f, delta_kappa, phi_var)
-
-        lower = (0.0, J_bounds[0], phi_bounds[0])
-        upper = (np.inf, J_bounds[1], phi_bounds[1])
-    elif vertical_offset:
-        def model(x, a, J, b):
-            return a * core(x, J, f_c, kappa_c,
-                            delta_f, delta_kappa, phi) + b
-
-        lower = (0.0, J_bounds[0], 0.0)
-        upper = (np.inf, J_bounds[1], np.inf)
-    else:
-        def model(x, a, J):
-            return a * core(x, J, f_c, kappa_c,
-                            delta_f, delta_kappa, phi)
-
-        lower = (0.0, J_bounds[0])
-        upper = (np.inf, J_bounds[1])
-
-    # ---------- multi-start search -----------------------------------
-    best, best_loss = None, np.inf
-    for p0 in guesses:
-        try:
-            with warnings.catch_warnings():
-                warnings.filterwarnings("ignore", category=OptimizeWarning)
-                popt, pcov = curve_fit(
-                    model, fd,
-                    dbm if fit_in_db else y_lin,
-                    p0=p0, bounds=(lower, upper),
-                    maxfev=maxfev,
-                )
-        except Exception:
-            continue
-
-        J_trial = popt[1]  # Ĵ is always second parameter
-        if not (keep_lo <= J_trial <= keep_hi):
-            continue  # throw away – outside reported window
-
-        if not np.all(np.isfinite(np.diag(pcov))):
-            continue  # singular covariance
-
-        pred = model(fd, *popt)
-        loss = _loss(dbm if fit_in_db else y_lin, pred)
-        if loss < best_loss:
-            best_loss, best = loss, (popt, pcov)
-
-    if best is None:
-        raise RuntimeError(
-            f"coupled fit failed (Ĵ outside reported bounds) at sweep value: {current}"
-        )
-
-    popt, pcov = best
-    perr = np.sqrt(np.diag(pcov))
-
-    # ---------- unpack fit -------------------------------------------
-    idx = 0
-    a_fit, a_err = popt[idx], perr[idx];
-    idx += 1
-    J_fit, J_err = popt[idx], perr[idx];
-    idx += 1
-
-    if fit_phi:
-        phi_fit, phi_err = popt[idx], perr[idx];
-        idx += 1
-    else:
-        phi_fit, phi_err = phi, 0.0
-
-    if vertical_offset:
-        b_fit, b_err = popt[idx], perr[idx]
-    else:
-        b_fit, b_err = 0.0, 0.0
-
-    dof = max(1, len(fd) - n_par)
-    model_lin = model(fd, *popt)
-    resid = (dbm if fit_in_db else y_lin) - model_lin
-    chi2 = float(np.sum(resid ** 2))
-    redchi = float(chi2 / dof)
-
-    return CoupledFitOutcome(
-        a=a_fit, a_err=a_err,
-        J=J_fit, J_err=J_err,
-        phi=phi_fit, phi_err=phi_err,
-        b=b_fit, b_err=b_err,
-        chi2=chi2, redchi=redchi, pcov=pcov,
-        model_curve=model_lin if not fit_in_db else _to_db(model_lin),
-        fit_ok=np.all(perr > 0) and np.all(np.isfinite(perr)),
-    )
-
 
 def merge_cavity_yig(
         cavity_df: pd.DataFrame,
@@ -661,7 +466,7 @@ if __name__ == "__main__":
         delta_f=-8698.764387130737,  # GHz  (YIG detuned below)
         delta_kappa=18478.67660910223,  # GHz
         J=1e6,  # GHz  (coupling strength)
-        phi=np.deg2rad(10),  # 0 or pi in your experiments
+        phi=np.deg2rad(0),  # 0 or pi in your experiments
         a=2745535792643.5615,
         b=2.0049192130989785e-11,
         f_span=3e6  # GHz half-width shown
