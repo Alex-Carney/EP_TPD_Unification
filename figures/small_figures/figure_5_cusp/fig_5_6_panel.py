@@ -31,6 +31,7 @@ import matplotlib.patches as mpatches
 # =============================================================================
 OUTPUT_DIR = Path("results")
 OUTPUT_FILENAME = "FIG_5_6panel.png"
+OUTPUT_FILENAME_SVG = "FIG_5_6panel.svg"
 DPI = 400
 
 # =============================================================================
@@ -105,7 +106,7 @@ THEORY_CONFIG = {
     "dk_range_from_tpd_dimless": (-4e-3, 16e-3),
     "n_dk_points": 2501,
     "enable_noise_spread": True,
-    "n_noise_samples": 10,
+    "n_noise_samples": 10_000,
     "additive_noise_std": 0.000,
     "parametric_noise_dk_std": 0.0000,
     "parametric_noise_df_std": 1e-3,
@@ -475,6 +476,7 @@ def build_figure():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     out_path = OUTPUT_DIR / OUTPUT_FILENAME
     fig.savefig(out_path, dpi=DPI, facecolor="white")
+    fig.savefig(OUTPUT_DIR / OUTPUT_FILENAME_SVG, facecolor="white")
     plt.close(fig)
 
     print(f"\nSaved figure to: {out_path}")

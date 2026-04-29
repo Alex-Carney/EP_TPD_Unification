@@ -480,8 +480,12 @@ def build_single_column_figure(filename: str = "../../.figures/FIG_3_experiment_
 
     output_path = Path(filename)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    print(f"Saving figure to: {output_path.as_posix()}")
-    fig.savefig(output_path, dpi=1000, facecolor="white")
+
+    for suffix in [".png", ".svg"]:
+        out = output_path.with_suffix(suffix)
+        print(f"Saving figure to: {out.as_posix()}")
+        fig.savefig(out, dpi=1000 if suffix == ".png" else None, facecolor="white")
+
     plt.close(fig)
 
 

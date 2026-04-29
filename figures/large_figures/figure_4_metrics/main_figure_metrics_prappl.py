@@ -311,5 +311,6 @@ out_dir.mkdir(parents=True, exist_ok=True)
 
 out_path = out_dir / "FIG_4_metrics.png"
 fig.savefig(out_path, dpi=STYLE.save_dpi)
+fig.savefig(out_dir / "FIG_4_metrics.svg", dpi=STYLE.save_dpi)
 print(f"figure saved to {out_path}")
 plt.close(fig)
