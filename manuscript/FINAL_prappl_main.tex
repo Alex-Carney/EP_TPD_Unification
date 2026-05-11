@@ -1,0 +1,651 @@
+\documentclass[%
+  reprint,
+  amsmath,amssymb,
+  aps,
+  prapplied,
+  superscriptaddress,
+  longbibliography]{revtex4-2}
+
+\usepackage{tikz}
+\usepackage{amsmath} 
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{dcolumn}
+\usepackage{bm}
+\usepackage[english]{babel}
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\begin{document}
+
+\preprint{APS/123-QED}
+
+\title{Role of exceptional points and transmission peak degeneracies in non-Hermitian sensing}
+
+\author{Alexander S. Carney}
+\affiliation{\mbox{Thayer School of Engineering, Dartmouth College, 15 Thayer Drive, Hanover, New Hampshire 03755, USA}}
+
+\author{Juan S. Salcedo-Gallo}
+\affiliation{\mbox{Thayer School of Engineering, Dartmouth College, 15 Thayer Drive, Hanover, New Hampshire 03755, USA}}
+
+\author{Salil K. Bedkihal}
+\affiliation{\mbox{Thayer School of Engineering, Dartmouth College, 15 Thayer Drive, Hanover, New Hampshire 03755, USA}}
+
+\author{Mattias Fitzpatrick}
+\affiliation{\mbox{Thayer School of Engineering, Dartmouth College, 15 Thayer Drive, Hanover, New Hampshire 03755, USA}}
+\affiliation{\mbox{Department of Physics and Astronomy, Dartmouth College, 6127 Wilder Laboratory, Hanover, New Hampshire 03755, USA}}
+
+
+\begin{abstract}
+Transmission peak degeneracies (TPDs) have emerged as a promising alternative to exceptional points (EPs) for non-Hermitian sensing, providing square-root frequency splitting without the eigenbasis collapse and associated noise amplification that limit EP sensors. However, existing treatments of TPDs remain fragmented, lacking a unified theoretical framework, systematic figures of merit, or design principles for practical implementation. Here, we develop a comprehensive theory of two-dimensional TPDs that clarifies their relationship to EPs, maps their locations in parameter space, and provides analytic figures of merit for sensor design. We validate our theory using a tunable cavity-magnonics platform with in situ control of mode frequency, dissipation, and complex coupling via an effective synthetic gauge field. Our platform enables systematic exploration of six representative EP–TPD configurations spanning $\mathcal{PT}$-symmetric, anti-$\mathcal{PT}$-symmetric and anyonic-$\mathcal{PT}$-symmetric regimes. Crucially, we show that TPDs, unlike EPs, can retain square-root splitting even under nuisance parameter drift through generalized transmission extrema degeneracies (TEDs). We further identify specific robust TPD configurations that minimize the impact of nuisance drift. These findings establish a unified theoretical and experimental framework for TPD-based non-Hermitian sensing.
+\end{abstract}
+
+\date{\today}
+\maketitle
+
+\section{\label{sec:intro} Introduction}
+
+The past decade has seen sustained theoretical and experimental efforts to leverage exceptional points (EPs) for enhanced sensing \cite{wiersig_review_2020, wiersig_sensors_2016, wiersig_enhancing_2014, park_symmetry-breaking-induced_2020, kononchuk_exceptional-point-based_2022, suntharalingam_noise_2023}. The appeal of EP sensors is sublinear sensing: near an EP of order $n \geq 2$, the eigenvalue splitting scales as $\Delta_\lambda \propto \epsilon^{1/n}$ with perturbation $\epsilon$. Therefore, the corresponding susceptibility $\partial(\Delta_\lambda)/\partial\epsilon \propto 1/{\epsilon^{1 - 1/n}}$ diverges as $\epsilon\to0$, suggesting a route to dramatically enhance the sensor response. EPs have been studied in numerous experimental platforms including $\mathcal{PT}$-symmetric optical resonators \cite{chen_parity-time-symmetric_2018, ozdemir_paritytime_2019, miri_exceptional_2019}, electrical and superconducting circuits \cite{kononchuk_exceptional-point-based_2022, lu_harnessing_2025, dong_sensitive_2019, huerta-morales_generating_2023, naghiloo_quantum_2019, chen_decoherence-induced_2022}, and cavity-magnonic \cite{zhang_observation_2017} systems, as well as anti-$\mathcal{PT}$-symmetric circuits \cite{choi_observation_2018} and anyonic-$\mathcal{PT}$-symmetric lasers \cite{arwas_anyonic-parity-time_2022}. However, translating EP physics into practical sensors has faced considerable hurdles. In practice, EPs are isolated degeneracies in high-dimensional parameter spaces, and any deviation in a nuisance (non-sensing) parameter instantly lifts the degeneracy and removes the square-root eigenvalue splitting, rapidly diminishing the enhanced response. Furthermore, although early demonstrations of EP sensors show superior susceptibility to perturbations \cite{chen_exceptional_2017}, the complete eigenbasis collapse at EPs that yields the square-root splitting response inherently amplifies noise \cite{wang_petermann-factor_2020}. This intrinsic noise amplification at EPs, quantified by the divergence of the Petermann factor \cite{siegman_excess_1989}, fundamentally limits any improvement in the signal-to-noise ratio (SNR) for EP-based sensors \cite{langbein_no_2018, loughlin_exceptional-point_2024}. Consequently, the viability of frequency-splitting-based EP sensors remains actively debated \cite{mortensen_fluctuations_2018, wang_petermann-factor_2020, wiersig_prospects_2020, grant_rotation_2021, zhang_quantum_2019, lau_fundamental_2018}.
+
+Recent efforts have aimed to circumvent the fundamental noise–susceptibility tradeoff at EPs \cite{lu_harnessing_2025, kononchuk_exceptional-point-based_2022, xu_single-cavity_2024, geng_discrepancy_2021}. Specifically, a promising and experimentally accessible solution is to use degeneracies in the transmission spectrum rather than the eigenspectrum \cite{geng_discrepancy_2021}. Transmission peak degeneracies (TPDs) reproduce the same square-root splitting of EPs while generally maintaining linearity and a complete eigenbasis, and recent experiments have demonstrated that TPD-based sensors achieve improved SNR performance \cite{lu_harnessing_2025, kononchuk_exceptional-point-based_2022, xu_single-cavity_2024}. However, prior treatments have typically addressed TPDs as isolated phenomena rather than as points within a continuous parameter landscape, which limits systematic comparison across configurations. Unlike EPs, whose properties are topologically fixed, TPDs exist within a tunable design space where key figures of merit can be actively engineered through coupling phase and dissipation rates. Furthermore, while demonstrations of TPD sensors have achieved improved SNR, TPDs retain the fragility to nuisance fluctuations characteristic of EPs. Prior work has either left this vulnerability unaddressed or suppressed it with closed-loop feedback \cite{lu_harnessing_2025}, without analyzing the underlying mechanism. More broadly, a unified framework for EPs and TPDs across symmetry classes, along with systematic figures of merit and design principles, remains absent.
+
+Here, we establish a unified semiclassical framework for two-dimensional EPs and TPDs. In Sec.~\ref{sec:arch} we implement a loop-coupled cavity-magnonic architecture (Fig.~\ref{fig:platform}) with the extensive parameter control necessary to navigate the non-Hermitian landscape. In Sec.~\ref{sec:dynamics}, we map the parameter landscape of EPs and TPDs (Fig.~\ref{fig:theory}), establishing a general model for the dynamics, eigenspectrum, and transmission spectrum. We experimentally validate these predictions in Sec.~\ref{section:results}, systematically realizing six distinct EP–TPD configurations by varying the control parameters (Fig.~\ref{fig:eps}). With the parameter space mapped, Sec.~\ref{section:design_guidance} derives analytic figures of merit to guide sensor design subject to noise, nuisance fluctuations, and experimental constraints (Fig.~\ref{fig:petermann}). Finally, in Sec.~\ref{sec:ted}, we demonstrate that specific control parameters realize a robust TPD with minimal response to nuisance fluctuations (Fig.~\ref{fig:parametric}). Furthermore, we show that the third-order degeneracy of TPDs offers a fundamental advantage for retaining sublinear splitting even in the presence of fluctuations. Together, these results provide design principles for TPD-based sensors and a platform for further studies of non-Hermitian dynamics.
+
+\begin{figure}
+\centering
+\includegraphics[width=.44\textwidth]{prappl_submission/prappl_figures/FIG_1_platform.png}
+\caption{(a) Schematic of our architecture. The coupling amplifier and phase shifter ($G, \phi$) determine the coupling rate ($J$) and phase ($\phi$). Auxiliary controls ($g_c, g_y, \psi_c, \psi_y, B_z$) modify the mode parameters $f_c, f_y, \kappa_c, \kappa_y$. (b)--(g) Transmission spectra as a function of current through an external electromagnet, which tunes the YIG frequency $f_y$ through $B_z$ and thereby controls the detuning between the modes. Data illustrate level repulsion ($\phi = 0$) (b),(c),(f),(g) and level attraction ($\phi = \pi$) (d),(e) for varying coupling strengths $J$ and average dissipation rates $\bar{\kappa}$.}
+\label{fig:platform}
+\end{figure}
+
+\section{\label{sec:arch} Tunable Architecture}
+
+Our architecture is a magnon-photon dimer, consisting of the lowest frequency mode of a three-dimensional microwave cavity \cite{reagor_quantum_2016} with frequency $f_c$ and loaded full-width-at-half-maximum $\kappa_c$ and a magnon mode realized using a yttrium iron garnet (YIG) sphere of diameter 1~mm. The magnon Larmor frequency is $f_y = \gamma B_z/2\pi$, where $\gamma$ is the gyromagnetic ratio, and $B_z$ is the strength of an applied static magnetic field \cite{sparks_ferromagnetic_1961}. Two orthogonal wire bonds inductively couple to the magnon mode, passing signals around $f_y$, with loaded full-width-at-half-maximum $\kappa_y$, exhibiting a Lorentzian transmission spectrum \cite{barry_ferrimagnetic_2023}. 
+
+The cavity and YIG are spatially separated by approximately one meter and connected using Sub-Miniature version A (SMA) cables \cite{rao_meterscale_2023} (Fig.~\ref{fig:platform}(a)). We equip each coupling path with a tunable directional amplifier and one path with a digital phase shifter. Together, these elements symmetrically control the coupling strength $J>0$ and impart a controllable relative phase $\phi$, forming an effective synthetic gauge field \cite{salcedo-gallo_demonstration_2025, gardin_engineering_2024}. The resulting complex coupling coefficient, $Je^{i\phi}$, is tunable across the full range $\phi \in [0, 2\pi)$ while preserving the coupling magnitude, allowing this platform to be used to study $\mathcal{PT}$-symmetric ($\phi = 0$) \cite{bender_real_1998, regensburger_paritytime_2012}, anti-$\mathcal{PT}$-symmetric ($\phi = \pi$) \cite{peng_anti-paritytime_2016, li_antiparity-time_2019, choi_observation_2018, zhang_synthetic_2020}, and anyonic-$\mathcal{PT}$-symmetric ($\phi \notin \{0, \pi\}$) dynamics \cite{li_experimental_2024, arwas_anyonic-parity-time_2022, gao_parity-time-anyonic_2019}. At $\phi = 0$, the system exhibits level repulsion, characterized by an avoided crossing as $f_y$ is tuned through $f_c$, whose gap increases with $J$ \cite{harder_level_2018} (Fig.~\ref{fig:platform}(b),(c),(f),(g)). Modifying the average dissipation rate, $\bar{\kappa} = (\kappa_c + \kappa_y)/2$, changes the linewidths of the hybridized modes (Fig.~\ref{fig:platform}(f),(g)). At $\phi = \pi$, level attraction is observed, where the hybridized modes coalesce and split as the individual frequencies are detuned (Fig.~\ref{fig:platform}(d),(e)). As expected, the extent of the coalescence region increases with $J$. For all other phase values, the two couplings still share the same magnitude, but their complex phases differ by an angle that cannot be removed by a single phase redefinition or gauge transformation. The dynamics of these phase-non-reciprocal configurations are explored in Figs.~\ref{fig:theory}, \ref{fig:eps}, and \ref{fig:petermann}.
+
+To complete the six-parameter control of the dimer, each mode is equipped with a self-feedback loop consisting of a digital phase shifter with phase $\psi_{c,y}$ and an effective variable-gain amplifier with gain $g_{c,y}$ (Fig.~\ref{fig:platform}(a)), where the subscripts $(c, y)$ correspond to the cavity and YIG self-feedback loops, respectively. For the YIG self-feedback loop, a voltage-controlled analog attenuator tunes $g_y$ instead, such that $\kappa_y$ is a function of voltage. Adjusting $\psi_{c,y}$ and $g_{c,y}$ provides in situ tuning of the mode frequencies $f_{c,y}$ and dissipation rates $\kappa_{c,y}$. Figure~\ref{fig:platform} illustrates the experimental schematic (Fig.~\ref{fig:platform}(a)) and various transmission experiments highlighting parameter control (Fig.~\ref{fig:platform}(b--g)).
+
+\section{\label{sec:dynamics} Non-Hermitian Dynamics}
+
+The dynamics of the system are governed by the semiclassical equations of motion in the rotating frame with respect to the normalized drive frequency $\tilde{f}_d$, given by
+\begin{align}
+\frac{d}{dt}\,\tilde{\boldsymbol{\alpha}} &= \tilde{\boldsymbol{A}}\,\tilde{\boldsymbol{\alpha}} + \boldsymbol{B}\,\tilde{u}, \label{eq:time_dep}\\
+\tilde{\boldsymbol{\alpha}}_{\mathrm{ss}}(\tilde{f}_d) &= (i\,\tilde{f}_d\,\boldsymbol{I} + \tilde{\boldsymbol{A}})^{-1}\boldsymbol{B}\,\tilde{u}, \label{eq:alpha_ss}\\
+\tilde{\beta}_{\mathrm{ss}}(\tilde{f}_d) &= \bigl|\boldsymbol{C}\,\tilde{\boldsymbol{\alpha}}_{\mathrm{ss}}(\tilde{f}_d)\bigr|^2. \label{eq:beta_ss}
+\end{align}
+$\tilde{\boldsymbol{A}}$ is the nondimensionalized dynamical system matrix defined in Eq.~\ref{eq:model}, $\boldsymbol{I}$ is the identity matrix, and $\tilde{\boldsymbol{\alpha}} = [\tilde{\alpha}_c, \tilde{\alpha}_y]^{\mathrm T}$ denotes the complex normalized coherent state amplitudes of the photon ($\tilde{\alpha}_c$) and magnon ($\tilde{\alpha}_y$) modes, and $\tilde{\boldsymbol{\alpha}}_{\mathrm{ss}}$ denotes the corresponding steady-state solution. The drive vector $\boldsymbol{B}$ and readout vector $\boldsymbol{C}$ each select one of the two modes. $\boldsymbol{B} \in \{[1,0]^{\mathrm T}, [0,1]^{\mathrm T}\}$ sets whether the cavity or YIG is driven with normalized strength $\tilde{u}$, and $\boldsymbol{C} \in \{[1,0], [0,1]\}$ sets which mode is read out. Throughout the Main Text, we drive the cavity ($\boldsymbol{B} = [1,0]^{\mathrm T}$) and read out the YIG ($\boldsymbol{C} = [0,1]$), while alternative configurations are considered in Sec.~\ref{appendix-sec:drive_readout_vector}. $\tilde{\beta}_{\mathrm{ss}}$ in Eq.~\ref{eq:beta_ss} represents the steady-state transmission spectrum, which is only valid when all real parts of the eigenvalues of $\tilde{\boldsymbol{A}}$ are negative. When $\tilde{\boldsymbol{A}}$ becomes unstable, amplifier saturation leads to nonlinear phenomena such as synchronization, nonlinear exceptional points, and generalized $\mathcal{PT}$ symmetry \cite{bai_nonlinear_2023, salcedo-gallo_demonstration_2025, wu_generalized_2022}.
+
+The system matrix generates dynamics and is given in nondimensionalized form by
+\begin{align}\label{eq:model}
+\tilde{\boldsymbol{A}} =  \begin{bmatrix}
+-i\tilde{f}_c - \frac{\tilde{\kappa}_c}{2}  & -i \\ 
+-i e^{i\phi} & -i(\tilde{f}_c  - \tilde{\Delta}_f) + \left(\tilde{\Delta}_\kappa - \frac{\tilde{\kappa}_c}{2}\right)
+\end{bmatrix},
+\end{align}
+where $\tilde{f}_c = f_c/J$, $\tilde{\kappa}_c = \kappa_c/J$, etc., and $\tilde{\Delta}_f = \tilde{f}_c - \tilde{f}_y$, and $\tilde{\Delta}_\kappa = (\tilde{\kappa}_c - \tilde{\kappa}_y)/2$ (see Sec.~\ref{appendix:a} for derivation) \cite{yao_microscopic_2019}. Nondimensionalizing by $J$ eliminates a free parameter and removes units from the analysis, simplifying the closed-form expressions derived in the following sections. We treat $\boldsymbol{\tilde{\Delta}} \equiv (\tilde{\Delta}_\kappa, \tilde{\Delta}_f)$ as the parameter plane within which EPs, TPDs, and TEDs are located, while $\tilde{\kappa}_c$ and $\phi$ act as control parameters that shift these degeneracies around in $\boldsymbol{\tilde{\Delta}}$-space (see Sec.~\ref{appendix:notation} for a summary of notation).
+
+\begin{figure}
+\centering
+\includegraphics[width=0.48\textwidth]
+{prappl_submission/prappl_figures/FIG_2_theory_small_prappl.png}
+\caption{Parameter landscape on the $\boldsymbol{\tilde{\Delta}}$-plane for $\phi = 0$ (a),(b), $\phi = \pi$ (c),(d), and $\phi = \pi/2$ (e),(f). Each panel's $\phi$ and $\tilde{\kappa}_c$ match the corresponding panel in Fig.~\ref{fig:eps}. The background depicts the Petermann factor clipped at the 90th percentile, with the inferno (gray) colorscale indicating the stable (unstable, linear model inapplicable) regimes. Three families of dashed contours structure the plane. The cyan contours mark $\mathrm{Disc}=0$ (Eq.~\ref{eq:disc_algebraic}), which separates the single-peak region (outside cyan contours horizontally) from the two-peak region (between cyan contours horizontally). The magenta contours mark the multiple branches of $\tilde{q}=0$ (Eq.~\ref{eq:q}), with the branch through both the primary EP and primary TPD serving as the experimental sweep trajectory of Fig.~\ref{fig:eps}. The lime contours mark $\operatorname{Re}(\tilde{\Delta}_\lambda)=\tilde{\kappa}_c-\tilde{\Delta}_\kappa$, the instability boundary. TPDs lie at intersections of the cyan and magenta contours. The primary EPs (red crosses) and primary TPDs (red circles) are the focus of this work. Gray crosses and circles mark other EPs and secondary TPDs. Gray diamonds are rogue TPDs, unpaired with any EP (Sec.~\ref{appendix:b}). Panel (g) depicts an alternative view of panel (a) as a cross-section along $\tilde{\Delta}_\kappa$, where $|\mathrm{Im}(\tilde{\lambda})|$ (dashed) splits at the EP and the transmission peaks $\tilde{\nu}_\pm$ (blue) split at the TPD.}
+
+\label{fig:theory}
+\end{figure}
+
+\subsection{\label{subsec:eigenvalues} Eigenspectrum Analysis}
+
+The eigenvalues \( \tilde{\lambda}_\pm \) of \( \tilde{\boldsymbol{A}} \) are given by 
+\begin{align}
+\tilde{\Delta}_\lambda &\equiv \sqrt{ (\tilde{\Delta}_\kappa + i\tilde{\Delta}_f)^2 - 4 e^{i\phi} }, \label{eq:deltalambda_tilde} \\
+\tilde{\lambda}_\pm &= \left( \frac{\tilde{\Delta}_\kappa}{2} - \frac{\tilde{\kappa}_c}{2} \right) + i \left( \frac{\tilde{\Delta}_f}{2} - \tilde{f}_c \right) \pm \frac{\tilde{\Delta}_\lambda}{2}, \label{eq:lambda0_tilde}
+\end{align}
+where \( \operatorname{Re}(\tilde{\lambda}) \) is related to the dissipation or gain, and \( \operatorname{Im}(\tilde{\lambda}) \) is related to the oscillation frequency of each mode. This convention is opposite to the typical Hamiltonian-based formulation, but provides consistent results while offering a direct connection to electrical engineering \cite{salcedo-gallo_demonstration_2025} and modern control theory \cite{juang_identification_2001}. 
+
+EPs are defined by the simultaneous coalescence of eigenvectors and eigenvalues. We locate EPs using the mean diagonal Petermann factor, which equals unity for orthogonal eigenvectors and diverges at EPs (see Sec.~\ref{appendix-sec:petermann} for additional information) \cite{zheng_mathcalpt_2010, ashida_non-hermitian_2020, siegman_excess_1989}. For $\tilde{\boldsymbol{A}}$ in Eq.~\ref{eq:model}, we find
+\begin{align}
+    \text{PF} = \frac{\tilde{\Delta}_f^2 + \tilde{\Delta}_\kappa^2 + |\tilde{\Delta}_\lambda|^2 + 4}{2|\tilde{\Delta}_\lambda|^2},
+\end{align}
+which diverges as $\tilde{\Delta}_\lambda \rightarrow 0$. This divergence condition reveals a continuous manifold of EPs in parameter space, a so-called exceptional surface \cite{zhou_exceptional_2019}. We define EP locations as $\boldsymbol{\tilde{\Delta}}^\mathrm{EP} \equiv (\tilde{\Delta}_\kappa^\text{EP}, \tilde{\Delta}_f^\text{EP})$ given by
+\begin{align}
+    \tilde{\Delta}_\kappa^\text{EP} = \pm 2\cos\bigg(\frac{\phi}{2}\bigg), \quad 
+    \tilde{\Delta}_f^\text{EP} = \pm 2\sin \bigg(\frac{\phi}{2}\bigg).
+\end{align}
+At each value of $\phi$, there are two EPs (``primary'' and ``other''), depicted in Fig.~\ref{fig:theory}, with ``primary'' EPs (red crosses) investigated experimentally in Fig.~\ref{fig:eps}. Near EPs, the diverging Petermann factor corresponds to noise enhancement \cite{wang_petermann-factor_2020, ghosh_suppression_2024}. Moving away from the EPs in $\boldsymbol{\tilde{\Delta}}$-space reduces the Petermann factor, reaching unity between the two EPs on a line parameterized by $\tilde{\Delta}_f = -\cot(\phi/2) \tilde{\Delta}_\kappa$.  
+
+\subsection{\label{subsec:transmission_spectrum} Transmission Spectrum Analysis}
+
+We obtain transmission frequency extrema by solving $\frac{\partial}{\partial \tilde{f}_d}\tilde{\beta}_{\mathrm{ss}}=0$ for $\tilde{f}_d$. Since the denominator of $\tilde{\beta}_{\mathrm{ss}}$ (Eq.~\ref{eq:beta_ss}) is a quartic polynomial in $\tilde{f}_d$ (Sec.~\ref{appendix:comp_methods}), this extrema condition reduces exactly to a cubic polynomial, which we cast in depressed form with auxiliary variable $x$ as
+\begin{align}
+    0 &= x^3 + \tilde{p}x + \tilde{q}, \label{eq:cubic} \\
+    \tilde{p} &= \frac{ (\tilde{\kappa}_c - \tilde{\Delta}_\kappa)^2 + \operatorname{Re}(\tilde{\Delta}_\lambda^2) }{4}, \label{eq:p} \\
+    \tilde{q} &= \frac{ (\tilde{\kappa}_c - \tilde{\Delta}_\kappa) \, \operatorname{Im}(\tilde{\Delta}_\lambda^2) }{8}. \label{eq:q}
+\end{align}
+This formulation distills the extrema condition into fundamental physical parameters: the eigenvalue splitting $\tilde{\Delta}_\lambda$ (Eq.~\ref{eq:deltalambda_tilde}), and $\tilde{\kappa}_c - \tilde{\Delta}_\kappa$, which can be identified as the normalized average dissipation rate $(\tilde{\kappa}_c + \tilde{\kappa}_y)/2$. 
+
+The discriminant ($\mathrm{Disc}$) governs the nature of the roots of Eq.~\ref{eq:cubic}, where
+\begin{align} 
+\mathrm{Disc} &= -4\tilde{p}^3 - 27 \tilde{q}^2, \label{eq:disc_algebraic}\\ &= (\tilde{\nu}_+^\text{Root} \!\!-\! \tilde{\nu}_-^\text{Root})^2 (\tilde{\nu}_+^\text{Root} \!\!-\!  \tilde{\eta}^\text{Root})^2 (\tilde{\nu}_-^\text{Root} \!\!-\!  \tilde{\eta}^\text{Root})^2. \nonumber
+\end{align}
+Equation~\ref{eq:disc_algebraic} gives the algebraic form of the discriminant, or equivalently, in terms of the roots. When $\mathrm{Disc} < 0$, Eq.~\ref{eq:cubic} admits one real root, $\tilde{\nu}_0^{\text{Root}}$, and the system exhibits a single transmission peak located at $\tilde{\nu}_0 = \tilde{\nu}_0^{\text{Root}}+\tilde{f}_c-\tilde{\Delta}_f/2$. When $\mathrm{Disc} > 0$, Eq.~\ref{eq:cubic} admits three real roots, $\tilde{\nu}_\pm^{\text{Root}}, \tilde{\eta}^{\text{Root}}$. In this case, $\tilde{\nu}_\pm = \tilde{\nu}_\pm^\text{Root} + \tilde{f}_c - \frac{\tilde{\Delta}_f}{2}$ are the frequencies of the two transmission peaks, and $\tilde{\eta} = \tilde{\eta}^\text{Root} + \tilde{f}_c - \frac{\tilde{\Delta}_f}{2}$ is the frequency of the local minimum between the two peaks. Equation~\ref{eq:cubic} admits a closed-form solution via Cardano's method or, equivalently, the trigonometric form first posed by Fran\c{c}ois Vi\`ete in 1615 \cite{nickalls_viete_2006, viete_ad_1615}, with
+\begin{align}
+    \tilde{\theta} &= \frac{1}{3}\arccos\!\left(
+        \frac{3\tilde{q}}{2\tilde{p}}\sqrt{\frac{-3}{\tilde{p}}}
+    \right), \label{eq:theta} \\
+    \tilde{\nu}_+^\text{Root} &= 2\sqrt{\frac{-\tilde{p}}{3}}\,
+        \cos\!\left(\tilde{\theta}\right), \label{eq:nu_plus} \\
+    \tilde{\eta}^{\text{Root}} &= 2\sqrt{\frac{-\tilde{p}}{3}}\,
+        \cos\!\left(\tilde{\theta} - \frac{2\pi}{3}\right), \label{eq:eta} \\
+    \tilde{\nu}_-^{\text{Root}} &= 2\sqrt{\frac{-\tilde{p}}{3}}\,
+        \cos\!\left(\tilde{\theta} - \frac{4\pi}{3}\right). \label{eq:nu_minus}
+\end{align}
+The transmission peak splitting is $\tilde{\Delta}_\nu \equiv |\tilde{\nu}_+ - \tilde{\nu}_-|$, analogous to $\tilde{\Delta}_\lambda$ from Eq.~\ref{eq:deltalambda_tilde}. Equations~\ref{eq:theta}--\ref{eq:nu_minus} are valid when $\mathrm{Disc} > 0$. We give the closed-form solution for $\tilde{\nu}_0^\text{Root}$ in the single-peak regime ($\mathrm{Disc} < 0$) in Sec.~\ref{appendix-sec:single_root}. 
+
+The condition $\mathrm{Disc} = 0$ marks the boundary between the single-peak and split-peak regimes. From the product definition of the discriminant in Eq.~\ref{eq:disc_algebraic}, $\mathrm{Disc} = 0$ indicates a root degeneracy but not necessarily the triple degeneracy required for a TPD. A standard root coalescence where a peak $\tilde{\nu}_\pm^\text{Root}$ merges with the minimum $\tilde{\eta}^\text{Root}$ is referred to as a transmission extrema degeneracy (TED). TPDs are distinguished from TEDs by solving $\mathrm{Disc}=0$ and $\tilde{q}=0$ simultaneously. Figure~\ref{fig:theory} depicts the contours $\mathrm{Disc}=0$ (cyan) and $\tilde{q}=0$ (magenta); their intersections mark the TPDs. For each $\phi$ there are two (Fig.~\ref{fig:theory}(a),(b)), four (Fig.~\ref{fig:theory}(c)--(f)), or six TPDs, with locations $\boldsymbol{\tilde{\Delta}}^\text{TPD} \equiv (\tilde{\Delta}_\kappa^\text{TPD}, \tilde{\Delta}_f^\text{TPD})$ dependent on $\tilde{\kappa}_c$. We classify them as primary TPDs (red circles, experimentally validated in Fig.~\ref{fig:eps}, and the focus of this work), secondary TPDs (gray circles), and rogue TPDs (gray diamonds, detached from any EP). For fixed $\phi$, the EPs are stationary while TPDs can be moved with $\tilde{\kappa}_c$. The full parameterization of the TPD surface is given in Sec.~\ref{appendix:b}.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.44\textwidth]{prappl_submission/prappl_figures/FIG_3_experiment_small.png}
+\caption{Experimentally fitted transmission peak locations $\tilde{\nu}_\pm$ (black circles) overlaid atop theory (solid lines) and $|\operatorname{Im}(\tilde{\lambda}_\pm)|$ (dashed lines). The coupling phase ($\phi$) determines the relevant sweep parameter. (a),(b) $\phi = 0$ (blue) sweeps $\tilde{\Delta}_\kappa$, (c),(d) $\phi = \pi$ (purple) sweeps $\tilde{\Delta}_f$, and (e),(f) $\phi = \pi/2$ (green) sweeps along a hyperbolic path ($\tilde{\Delta}_\kappa \tilde{\Delta}_f = 2$) projected onto the $\tilde{\Delta}_\kappa$ axis. In all cases, the TPD location moves with $\tilde{\kappa}_c$, while the EP is static, with the left (right) column surveying smaller (larger) $\tilde{\kappa}_c$ values that place the TPD and EP closer to (further from) each other.}
+\label{fig:eps}
+\end{figure}
+
+\section{\label{section:results} Experimental Validation}
+
+Here, we experimentally validate the square-root splitting of transmission peaks at TPDs by probing along the $\tilde{q} = 0$ contour that intersects both the primary EP and TPD. This trajectory enforces $\operatorname{Re}(\tilde{\Delta}_\lambda)=0$ along the sweep, ensuring that the peaks split with equal amplitude. For $\phi = 0$, the $\tilde{q} = 0$ path is the $\tilde{\Delta}_\kappa$ axis (Fig.~\ref{fig:theory}(a),(b)), tuned experimentally by varying the voltage applied to an analog attenuator. For $\phi = \pi$, the path is the $\tilde{\Delta}_f$ axis (Fig.~\ref{fig:theory}(c),(d)), controlled by the magnetic field applied to the YIG ($B_z$). For intermediate values of $\phi$, the path follows a hyperbola defined by $\tilde{\Delta}_\kappa \tilde{\Delta}_f = 2 \sin(\phi)$ (Fig.~\ref{fig:theory}(e),(f)), requiring simultaneous control of $\tilde{\Delta}_f$ and $\tilde{\Delta}_\kappa$. Arbitrary paths in $\boldsymbol{\tilde{\Delta}}$-space are tracked by our experimental apparatus using a parameter feedback control system (Sec.~\ref{appendix-sec:methods-control}).
+
+Our experimental methods are summarized here and detailed in Methods (Sec.~\ref{appendix:d}). For each $\phi$, we calibrate $J$ to convert measured $\Delta_f, \Delta_\kappa$ to their dimensionless forms. Sweeps are initialized by calibrating $\tilde{\kappa}_c$ and defining a $\tilde{\Delta}_f$ or $\tilde{\Delta}_\kappa$ range to sweep. The experiment tracks $\tilde{q} = 0$ in $\boldsymbol{\tilde{\Delta}}$-space. At each step, we first probe the uncoupled cavity (YIG) modes ($J=0$), fit them to Lorentzians to extract $f_{c(y)}, \kappa_{c(y)}$, and propagate uncertainties $\sigma(f_{c(y)}), \sigma(\kappa_{c(y)})$ to $\tilde{\Delta}_f, \tilde{\Delta}_\kappa$. We then enable coupling ($J>0$), record transmission through the cavity to the YIG mode, and fit Eq.~\ref{eq:beta_ss}, extracting peak locations $\tilde{\nu}_\pm$ from the roots of Eq.~\ref{eq:cubic}. Fit uncertainties on $f_{c(y)}, \kappa_{c(y)}$ are extracted from the Lorentzian-fit covariance matrix and propagated to peak locations $\tilde{\nu}_\pm$ using $N = 10^4$ Monte Carlo resamples of the fit parameters, producing the error bars in Fig.~\ref{fig:eps}. The separate experimental uncertainty on $\tilde{\kappa}_c$ is taken as the standard deviation of $\tilde{\kappa}_c$ across the sweep and propagated analytically where a closed-form expression exists, or by Monte Carlo otherwise, to the reported uncertainties on EP, TPD, and instability locations.
+
+The locations of EPs and TPDs along the $\tilde{q} = 0$ trajectory are visualized in Fig.~\ref{fig:eps}. For $\phi = 0$, we calibrate $J=1.05(1)$~MHz, and scan $\tilde{\Delta}_\kappa$ while keeping $\tilde{\Delta}_f = 0$. This reveals a static EP at $\tilde{\Delta}_\kappa^\text{EP}=\pm 2$ and a movable TPD at $\tilde{\Delta}_\kappa^\text{TPD} = \frac{1}{2}(\tilde{\kappa}_c \pm \sqrt{8 - \tilde{\kappa}_c^2})$. Figure~\ref{fig:eps}(a),(b) confirms this behavior, depicting the TPD at $\tilde{\Delta}_\kappa^\text{TPD} = -1.04(1)$ for $\tilde{\kappa}_c = 0.67(1)$ (Fig.~\ref{fig:eps}(a)) and $\tilde{\Delta}_\kappa^\text{TPD} = -0.05(4)$ for $\tilde{\kappa}_c = 1.95(1)$ (Fig.~\ref{fig:eps}(b)). In both cases, the transmission peaks $\tilde{\nu}_\pm$ split at the TPD while remaining bounded by $|\text{Im}(\tilde{\lambda}_\pm)|$. The linear regime is bounded by the instability transition observed at $\tilde{\Delta}_\kappa^\text{NL} = 0.67(1)$ (Fig.~\ref{fig:eps}(a)), consistent with the theoretical predictions $\tilde{\Delta}_\kappa^\text{NL} = \min(\tilde{\kappa}_c, (\tilde{\kappa}_c^2 + 4)/2\tilde{\kappa}_c)$.
+
+For $\phi = \pi$, we calibrate $J=1.12(2)$~MHz, and scan $\tilde{\Delta}_f$ while keeping $\tilde{\Delta}_\kappa = 0$. This reveals static EPs at $\tilde{\Delta}_f^\text{EP} = \pm 2$, movable TPDs at $\tilde{\Delta}_f^\text{TPD} = \pm \sqrt{\tilde{\kappa}_c^2 + 4}$, and instability transitions at $\tilde{\Delta}_f^\text{NL} = \pm \sqrt{4 - \tilde{\kappa}_c^2}$. Figure~\ref{fig:eps}(c),(d) depicts the TPD and instability transition at $\tilde{\Delta}_f^\text{TPD} = 2.168(4)$, $\tilde{\Delta}_f^\text{NL} = 1.817(4)$ for $\tilde{\kappa}_c = 0.84(1)$ (Fig.~\ref{fig:eps}(c)) and $\tilde{\Delta}_f^\text{TPD} = 2.603(7)$, $\tilde{\Delta}_f^\text{NL} = 1.117(7)$ for $\tilde{\kappa}_c = 1.67(1)$ (Fig.~\ref{fig:eps}(d)). 
+
+For $\phi = \pi/2$, we calibrate $J=0.95(2)$~MHz and scan along the hyperbolic trajectory $\tilde{\Delta}_f = 2/\tilde{\Delta}_\kappa$ to maintain $\tilde{q} = 0$. This reveals a static EP at $\boldsymbol{\tilde{\Delta}}^\text{EP} = (-\sqrt{2}, -\sqrt{2})$ and movable TPDs whose locations are given by the roots of a quartic equation (Sec.~\ref{appendix:b}). Figure~\ref{fig:eps}(e),(f) depicts the TPD (projected onto the $\tilde{\Delta}_\kappa$ axis) at $\boldsymbol{\tilde{\Delta}}^\text{TPD} = (-0.860(3), -2.327(9))$ for $\tilde{\kappa}_c = 1.30(1)$ (Fig.~\ref{fig:eps}(e)) and $\boldsymbol{\tilde{\Delta}}^\text{TPD} = (-0.657(4), -3.04(2))$ for $\tilde{\kappa}_c = 2.32(3)$ (Fig.~\ref{fig:eps}(f)). Unlike the $\phi = 0, \pi$ configurations, the instability transition remains inaccessible within the experimental window.
+
+\begin{figure*}[htbp!]
+\begin{centering}
+\includegraphics[width=0.98\textwidth]{prappl_submission/prappl_figures/FIG_4_metrics.png}
+\end{centering}
+\caption{(a)--(c) Experimental data from Fig.~\ref{fig:eps} recast as peak splitting ($\tilde{\Delta}_\nu$) versus the sweep parameter for $\phi = 0$ (a), $\phi = \pi$ (b), and $\phi = \pi/2$ (c). Markers distinguish small $\tilde{\kappa}_c$ (circles, data from the left column of Fig.~\ref{fig:eps}) and large $\tilde{\kappa}_c$ (triangles, data from the right column of Fig.~\ref{fig:eps}) configurations. (d) Semiclassical sensing figures of merit as functions of $\tilde{\kappa}_c$ for $\phi = 0$ (blue), $\phi = \pi$ (purple) and $\phi = \pi/2$ (green), with solid lines indicating theoretical predictions. (d.i) target signal splitting strength $\tilde{a}_{\text{sqrt}}^\text{TPD}$, (d.ii) nuisance scaling $\tilde{b}_{\text{cbrt}}^\text{TPD}$, (d.iii) thermal noise efficiency at the TPD, (d.iv) Petermann factor at the TPD, (d.v) distance from the TPD to the nearest instability transition, and (d.vi) distance to the nearest EP. Markers indicate the experimental configurations from (a)–-(c). Closed-form expressions for the $\phi = 0$ and $\phi = \pi$ curves in (d.i)–-(d.iv) are given in Eqs.~\ref{eq:phi_0_tpd_strength}--\ref{eq:nu_root_phi_pi_nuisance}. The $\phi=\pi/2$ curves are obtained by numerical evaluation.}
+\label{fig:petermann}
+\end{figure*}
+
+\section{\label{section:design_guidance} Figures of Merit for Sensor Design}
+In Sec.~\ref{section:results}, we establish that TPDs can be moved in $\boldsymbol{\tilde{\Delta}}$-space using the control parameters $\phi$ and $\tilde{\kappa}_c$. Here, we examine the implications of this tunability for sensing and identify figures of merit for selecting TPD configurations under specific experimental and noise constraints.
+
+Fundamentally, the sensing protocol used in Refs. \cite{kononchuk_exceptional-point-based_2022, lu_harnessing_2025} exploits the symmetric square-root splitting of transmission peaks (Fig.~\ref{fig:eps}) to detect external perturbations. We define the target signal perturbation $\boldsymbol{\tilde{\epsilon}} \equiv (\tilde{\epsilon}(\tilde{\Delta}_\kappa), \tilde{\epsilon}(\tilde{\Delta}_f)) > 0$ as a parameter shift at the TPD strictly aligned with the optimal sensing trajectory ($\tilde{q} = 0$) established in Sec.~\ref{section:results}. Along this trajectory, the peak splitting scales as
+\begin{align}
+\tilde{\Delta}_\nu(\boldsymbol{\tilde{\Delta}}^\text{TPD}+\boldsymbol{\tilde{\epsilon}}) \approx  \tilde{a}_\text{sqrt}^\text{TPD} \sqrt{\lVert \boldsymbol{\tilde{\epsilon}} \rVert}, \label{eq:splitting_expansion_target}
+\end{align}
+where $\tilde{a}_\text{sqrt}^\text{TPD}$ is a scaling coefficient defined in Sec.~\ref{subsec:signal_scaling}.  
+This definition distinguishes the signal from nuisance perturbations $\boldsymbol{\tilde{\delta}} \equiv (\tilde{\delta}(\tilde{\Delta}_\kappa), \tilde{\delta}(\tilde{\Delta}_f))$, which are orthogonal drifts off the optimal trajectory ($\boldsymbol{\tilde{\delta}} \cdot \boldsymbol{\tilde{\epsilon}} = 0$). The sensor response to the target signal is described using the susceptibility $\boldsymbol{\tilde{\chi}}_{\boldsymbol{\tilde{\epsilon}}} = \nabla_{\boldsymbol{\tilde{\epsilon}}} \tilde{\Delta}_\nu$, which diverges as $\tilde{a}_\text{sqrt}^\text{TPD}/(2\sqrt{\lVert\boldsymbol{\tilde{\epsilon}}\rVert})$ at TPDs (where $\lVert\boldsymbol{\tilde{\epsilon}}\rVert \to 0$), reminiscent of the behavior at EPs \cite{wiersig_enhancing_2014}.
+
+While the divergence of $\boldsymbol{\tilde{\chi}}_{\boldsymbol{\tilde{\epsilon}}}$ at the TPD is a universal feature, the practical utility of a TPD sensor is influenced by specific figures of merit. We consider three: the scaling coefficient of the peak splitting, the amplification of thermal noise, and the robustness against nuisance drift. Each depends on $\phi$ and $\tilde{\kappa}_c$ (see Sec.~\ref{appendix:comp_methods} for line-by-line derivations).
+
+\subsection{\label{subsec:signal_scaling}Scaling of Frequency Peak Splitting}
+
+Here, we provide the explicit forms of the scaling coefficient $\tilde{a}_\text{sqrt}^\text{TPD}$ introduced in Eq.~\ref{eq:splitting_expansion_target}. A similar metric was recently reported for the $\phi=\pi$ TPD \cite{kononchuk_exceptional-point-based_2022}. We formalize the definition for all TPDs by analyzing the first-order Puiseux series expansion of $\tilde{\Delta}_\nu$ along the target signal trajectories from Sec.~\ref{section:results}, and find
+\begin{align}
+\tilde{\Delta}_\nu(\phi = 0) &\approx
+\sqrt{2}\left(8-\tilde{\kappa}_{c}^{2}\right)^{1/4}
+\sqrt{\tilde{\epsilon}(\tilde{\Delta}_\kappa)},
+\label{eq:phi_0_tpd_strength} \\
+\tilde{\Delta}_\nu(\phi=\pi) &\approx \sqrt{2}\left( \tilde{\kappa}_c^2 + 4
+\right)^{1/4} 
+\sqrt{\tilde{\epsilon}(\tilde{\Delta}_f)} , 
+\label{eq:phi_pi_tpd_strength}
+\end{align}
+where the prefactor to the square-root term is $\tilde{a}_{\text{sqrt}}^\text{TPD}$. Equation~\ref{eq:phi_0_tpd_strength} is valid for $0 < \tilde{\epsilon}(\tilde{\Delta}_\kappa) < \sqrt{8 - \tilde{\kappa}_c^2}$. Equation~\ref{eq:phi_pi_tpd_strength} is valid for $\tilde{\epsilon}(\tilde{\Delta}_f)>0$. For $\phi = \pi/2$, $\tilde{a}_{\text{sqrt}}^\text{TPD}$ is not reported in closed-form, but can be computed numerically. Figure~\ref{fig:petermann}(d.i) displays $\tilde{a}_{\text{sqrt}}^\text{TPD}$ as a function of $\tilde{\kappa}_c$ for $\phi = 0, \pi, \pi/2$. 
+
+\subsection{\label{subsec:additive_noise}Semiclassical Petermann and Thermal Noise}
+
+While $\boldsymbol{\tilde{\chi}}$ and $\tilde{a}_{\text{sqrt}}^\text{TPD}$ govern the signal response, the ultimate sensitivity performance is constrained by the SNR. In the semiclassical limit, additive noise arises primarily from thermal fluctuations. As discussed in Sec.~\ref{subsec:eigenvalues}, the Petermann factor quantifies the noise amplification resulting from eigenbasis collapse. While the Petermann factor diverges at EPs, TPDs generally retain a complete eigenbasis and a finite Petermann factor (Fig.~\ref{fig:petermann}(d.iv)). Evaluating the Petermann factor at $\boldsymbol{\tilde{\Delta}} = \boldsymbol{\tilde{\Delta}}^\text{TPD}$ yields
+\begin{align}
+    \text{PF}^\text{TPD}(\phi = 0) &= \frac{8}{\tilde{\kappa}_c \sqrt{8 - \tilde{\kappa}_c^2}+4},\label{pf_tpd_phi_0} \\
+    \text{PF}^\text{TPD}(\phi = \pi) &= \frac{{\tilde{\kappa}_c}^2 +4}{{\tilde{\kappa}_c}^2},\label{pf_tpd_phi_pi}
+\end{align}
+where Eq.~\ref{pf_tpd_phi_0} is valid for the primary TPD with $\tilde{\kappa}_c \leq 2\sqrt{2}$. Figure~\ref{fig:petermann}(d.iv) plots Eqs.~\ref{pf_tpd_phi_0}--\ref{pf_tpd_phi_pi} alongside the numerically calculated Petermann factor for $\phi = \pi/2$. The Petermann factor at a TPD is related to the Euclidean distance in $\boldsymbol{\tilde{\Delta}}$-space between the TPD and nearest EP (Fig.~\ref{fig:petermann}(d.vi)), defined as $\text{dist}_\text{EP}(\phi, \tilde{\kappa}_c) \equiv \min_\text{EP} \lVert \boldsymbol{\tilde{\Delta}}^\text{TPD}(\phi, \tilde{\kappa}_c) - \boldsymbol{\tilde{\Delta}}^\text{EP}(\phi) \rVert_2$. As $\text{dist}_\text{EP} \to 0$, the TPD and EP coalesce, and the Petermann factor diverges.
+
+For TPDs where the Petermann factor is finite, a more representative metric for additive noise performance is the thermal noise efficiency ($\mathrm{N}_\text{th}$). This dimensionless metric quantifies the transduction of uncorrelated thermal fluctuations from the system's reservoirs to the readout port, normalized by $4k_B T_\text{eff} f_{\text{bw}}$, where $T_\text{eff}$ is the effective noise temperature, and $f_{\text{bw}}$ is the measurement resolution bandwidth. In terms of the system Green's function $\boldsymbol{\tilde{G}} = (i\tilde{f}_d \boldsymbol{I} + \boldsymbol{\tilde{A}})^{-1}$, the thermal noise efficiency is \cite{kononchuk_exceptional-point-based_2022, clerk_introduction_2010}
+\begin{align}
+    \mathrm{N}_\text{th} &\equiv \tilde{\kappa}_y^2 |\boldsymbol{\tilde{G}}_{2,2}|^2 + \tilde{\kappa}_c\tilde{\kappa}_y|\boldsymbol{\tilde{G}}_{2,1}|^2. \label{eq:tne_full}
+\end{align}
+We evaluate $\mathrm{N}_\text{th}$ at the TPD parameters ($\tilde{f}_d = \tilde{f}_d^\text{TPD}, \boldsymbol{\tilde{\Delta}} = \boldsymbol{\tilde{\Delta}}^\text{TPD}$) to quantify the thermal noise transduction across configurations. For $\phi = 0, \pi$, we obtain closed-form expressions for the noise efficiency at the degeneracy, given by
+\begin{align}
+    \mathrm{N}_\text{th}^\text{TPD}(\phi = 0) &= 4 - \frac{16}{\tilde{\kappa}_c \sqrt{8 - \tilde{\kappa}_c^2}+4},\label{eq:tne_tpd_0} \\
+    \mathrm{N}_\text{th}^\text{TPD}(\phi = \pi) &= \frac{2\tilde{\kappa}_c^2 + 8}{\tilde{\kappa}_c^2}.\label{eq:tne_tpd_pi}
+\end{align}
+Equation~\ref{eq:tne_tpd_0} is valid for the primary TPD with $\tilde{\kappa}_c \leq 2\sqrt{2}$. Figure~\ref{fig:petermann}(d.iii) depicts Eqs.~\ref{eq:tne_tpd_0}--\ref{eq:tne_tpd_pi} alongside the numerical result for $\phi = \pi/2$. In general, $\mathrm{N}_\text{th}$ tracks the distance between the TPD and the nearest instability transition (Fig.~\ref{fig:petermann}(d.v)), defined as $\text{dist}_\text{Inst}(\phi, \tilde{\kappa}_c) = \min_{\boldsymbol{\tilde{\Delta}} \in \text{Inst}} \lVert \boldsymbol{\tilde{\Delta}}^\text{TPD} - \boldsymbol{\tilde{\Delta}} \rVert_2$. For $\phi = \pi$, $\mathrm{N}_\text{th}$ diverges as $\tilde{\kappa}_c \to 0$ because both $\text{dist}_\text{EP} \to 0$ and $\text{dist}_\text{Inst} \to 0$. By contrast, $\mathrm{N}_\text{th}$ remains finite at $\phi = 0$ for all $\tilde{\kappa}_c \geq 0$ (Sec.~\ref{appendix-sec:TNE_away}).
+
+\subsection{\label{subsec:nuisance_scaling}Nuisance Scaling}
+
+Sensors based on degeneracies, like EPs, are notoriously fragile to nuisance fluctuations. Specifically, EP degeneracies are lifted by perturbations in any system parameter, not just the one being sensed. Once the degeneracy is lifted, the square-root splitting immediately vanishes (Sec.~\ref{appendix-sec:ep_hypersensitivity}). Thus, infinitesimal fabrication defects, calibration errors, or experimental uncertainty rapidly diminish the enhanced susceptibility. 
+
+Here, we quantify the response of TPDs to these nuisance parameters. We consider a path that crosses the TPD dominated by the nuisance perturbation $\boldsymbol{\tilde{\delta}}$ (with $\boldsymbol{\tilde{\epsilon}} = 0$). For the representative phases $\phi=0$ and $\phi=\pi$, the nuisance perturbation corresponds purely to a frequency $(\tilde{\delta}(\tilde{\Delta}_f))$ and a dissipation $(\tilde{\delta}(\tilde{\Delta}_\kappa))$ shift, respectively. Crossing $\mathrm{Disc} = 0$ with $\boldsymbol{\tilde{\delta}} \neq 0, \boldsymbol{\tilde{\epsilon}} = 0$ confines the system within the single-peak regime, with one peak frequency $\tilde{\nu}_0$. We analyze the Puiseux expansion of the closed-form solution for $\tilde{\nu}_0^\text{Root}$ (Sec.~\ref{appendix-sec:single_root}) at the TPD, subject to $\boldsymbol{\tilde{\delta}}$, and find 
+\begingroup
+\small
+\begin{align}
+    \tilde{\nu}_0^\text{Root}(\phi = 0) &\approx \frac{-\lvert \tilde{\kappa}_c^2 - 4\rvert^{1/3}}{2} \operatorname{sgn}\bigl{[}(\tilde{\kappa}_c^2 - 4)\tilde{\delta}(\tilde{\Delta}_f)\bigr{]} \lvert \tilde{\delta}(\tilde{\Delta}_f) \rvert^{1/3},\label{eq:nu_root_phi_0_nuisance} \\
+    \tilde{\nu}_0^\text{Root}(\phi = \pi) &\approx \frac{-2^{1/3} \tilde{\kappa}_c^{1/3} (\tilde{\kappa}_c^2 + 4)^{1/6}}{2} \operatorname{sgn}(\tilde{\delta}(\tilde{\Delta}_\kappa))\lvert \tilde{\delta}(\tilde{\Delta}_\kappa) \rvert^{1/3},\label{eq:nu_root_phi_pi_nuisance}
+\end{align}
+\endgroup
+where the magnitude of the cube-root prefactor is the nuisance splitting strength ($\tilde{b}_{\mathrm{cbrt}}^{\mathrm{TPD}}$), and $\operatorname{sgn}(\tilde{\delta})=\pm 1$ has the same sign as $\tilde{\delta}$. Figure~\ref{fig:petermann}(d.ii) depicts Eqs.~\ref{eq:nu_root_phi_0_nuisance}–-\ref{eq:nu_root_phi_pi_nuisance}. For intermediate values of $\phi$, the behavior is analyzed numerically for $\phi=\pi/2$ in Fig.~\ref{fig:petermann}(d.ii).
+
+\section{\label{sec:ted} Robust Transmission Peak Degeneracies}
+\begin{figure*}[htbp!]
+\begin{centering}
+\includegraphics[width=0.98\textwidth]{prappl_submission/prappl_figures/FIG_5_6panel.png}
+\end{centering}
+\caption{Monte Carlo simulation of nuisance propagation for $\phi = 0$ at three values of $\tilde{\kappa}_c$. (a) Local geometry of the $\mathrm{Disc} = 0$ contour (cyan dashed) near the TPD (red circle). The orange band depicts the standard deviation of a Gaussian-distributed nuisance fluctuation with $\sigma(\tilde{\delta}(\tilde{\Delta}_f)) = 10^{-3}$. In the non-robust configurations (a.i),(a.iii), the $\mathrm{Disc} = 0$ contour forms a cusp catastrophe that intersects the fluctuation band. (a.ii) At the robust TPD ($\tilde{\kappa}_c = 2$), the contour factorizes and the cusp vanishes. (b) Transduction of $\tilde{\delta}(\tilde{\Delta}_f)$ into transmission peak locations $\tilde{\nu}_\pm$, with each $\tilde{\kappa}_c$ shown in a distinct color and the vertical cyan line marking the TPD location. Solid lines show the mean peak frequencies, while shaded regions indicate $\pm 1\sigma(\tilde{\nu}_\pm)$ propagated from the nuisance fluctuations ($N = 10^4$ samples). Near the non-robust TPDs (b.i),(b.iii), the frequency-axis (vertical) broadening of the peak distribution ($\sigma(\tilde{\nu}_\pm)$) is described by Eq.~\ref{eq:nu_root_phi_0_nuisance}, while the sweep-axis (horizontal) broadening is related to the local cusp geometry (Sec.~\ref{appendix-sec:cusp_cat}). The robust configuration (b.ii) effectively decouples the peak splitting from $\tilde{\delta}(\tilde{\Delta}_f)$.}
+\label{fig:parametric}
+\end{figure*}
+
+The cube-root scaling of the nuisance response (Eqs.~\ref{eq:nu_root_phi_0_nuisance}--\ref{eq:nu_root_phi_pi_nuisance}) poses a fundamental vulnerability for TPD-based sensing. Since $\lVert \boldsymbol{\tilde{\delta}} \rVert^{1/3} \gg \lVert \boldsymbol{\tilde{\epsilon}} \rVert^{1/2}$ in the limit of small perturbations, the system's response to nuisance drift at most TPDs formally exceeds its response to the target signal. This effect is so pronounced that Ref. \cite{xu_single-cavity_2024} exploits it as a sensing mechanism, whereas Ref. \cite{lu_harnessing_2025} treats it as a dominant noise source requiring suppression with closed-loop feedback. 
+
+Equation~\ref{eq:nu_root_phi_0_nuisance} reveals a critical insight into curbing the cube-root nuisance response. For $\phi = 0$, the cube-root nuisance scaling coefficient vanishes exactly at $\tilde{\kappa}_c = 2$. Here, $\tilde{\nu}_0^\text{Root} \approx \tilde{\delta}(\tilde{\Delta}_f)/2$. We term this configuration a robust TPD.
+
+To depict the practical difference between robust and non-robust TPDs, we simulate the propagation of nuisance fluctuations into the transmission spectrum for $\phi = 0$ at three values of $\tilde{\kappa}_c$ (Fig.~\ref{fig:parametric}). We model $\tilde{\delta}(\tilde{\Delta}_f)$ as Gaussian-distributed with $\sigma = 10^{-3}$ (the orange band in Fig.~\ref{fig:parametric}(a) indicates the $\pm 1\sigma$ bounds) and propagate this uncertainty through $N = 10^4$ Monte Carlo samples to obtain the distribution of measured peak frequencies $\tilde{\nu}_\pm$. In the non-robust configurations ($\tilde{\kappa}_c = 1.5$ and $2.5$), the $\mathrm{Disc} = 0$ contour forms a cusp catastrophe \cite{arnold_catastrophe_1992} that broadens the peak distribution $\sigma(\tilde{\nu}_\pm)$ near the TPD (Fig.~\ref{fig:parametric}(a.i),(a.iii),(b.i),(b.iii)). In contrast, at the robust configuration ($\tilde{\kappa}_c = 2.0$) $\mathrm{Disc} = 0$ factorizes (Fig.~\ref{fig:parametric}(a.ii)), and $\sigma(\tilde{\nu}_\pm)$ remains suppressed throughout the sweep (Fig.~\ref{fig:parametric}(b.ii)). Further implications of operating a TPD sensor near a cusp catastrophe are explored in Sec.~\ref{appendix-sec:cusp_cat}. 
+
+While robust TPDs remove the cube-root nuisance scaling, even a linear nuisance response might seem problematic for a degeneracy-based sensor. At EPs, any perturbation, regardless of its scaling, immediately lifts the degeneracy and eliminates the square-root eigenvalue splitting (Sec.~\ref{appendix-sec:ep_hypersensitivity}). Remarkably, TPDs do not share this vulnerability, exhibiting a fundamental advantage of a third-order degeneracy. If a sensing path $\boldsymbol{\tilde{\epsilon}}$ misses the TPD due to $\boldsymbol{\tilde{\delta}} \neq 0$, the path can still intersect the nearby $\mathrm{Disc} = 0$ contour at a second-order-degenerate TED. Crucially, any sensing path crossing a TED at an incidence angle $\alpha \neq 0$ relative to the local $\mathrm{Disc} = 0$ contour preserves the square-root splitting, described by
+\begin{align}
+\tilde{\Delta}_\nu(\boldsymbol{\tilde{\Delta}}^\text{TED}+\boldsymbol{\tilde{\epsilon}}) \approx \tilde{\Delta}_\nu(\boldsymbol{\tilde{\Delta}}^\text{TED}) + \tilde{a}_\text{sqrt}^\text{TED} \sqrt{\lVert \boldsymbol{\tilde{\epsilon}} \rVert} + \mathcal{O}(\lVert \boldsymbol{\tilde{\epsilon}} \rVert), \label{eq:splitting_expansion}
+\end{align}
+where $\tilde{\Delta}_\nu(\boldsymbol{\tilde{\Delta}}^\text{TED}) \neq 0$ is the initial peak splitting at the TED and $\tilde{a}_\text{sqrt}^\text{TED}$ is the square-root splitting coefficient, which scales as $\tilde{a}_\text{sqrt}^\text{TED} \propto \lvert \tilde{p}^\text{TED} \rvert^{-1} \sqrt{\lVert \nabla_{\boldsymbol{\tilde{\Delta}}}\mathrm{Disc}^\text{TED} \rVert} \sqrt{\lvert \sin(\alpha) \rvert}$ (see Sec.~\ref{appendix-subsec:TED_str} for derivation). Because TEDs are strictly second-order degeneracies, both $\tilde{p}^\text{TED}$ and the discriminant gradient $\nabla_{\boldsymbol{\tilde{\Delta}}}\mathrm{Disc}^\text{TED}$ are inherently non-zero properties dictated by the specific location of the TED. Consequently, $\sqrt{\lvert \sin(\alpha) \rvert}$ provides the explicit operating condition governed by the sensing path design, where an orthogonal incidence ($\alpha = \pi/2$) maximizes the splitting strength. Thus, the effective sensing target for TPD sensors is not a fragile, isolated point, but an entire contour of TEDs. This intrinsic robustness explains why experimental implementations consistently recover the characteristic square-root response $\tilde{\Delta}_\nu \propto \sqrt{\lVert \boldsymbol{\tilde{\epsilon}} \rVert}$ despite the presence of nuisance fluctuations (Figs.~\ref{fig:eps}--\ref{fig:petermann})~\cite{lu_harnessing_2025, kononchuk_exceptional-point-based_2022}.
+
+The robust TPD therefore offers a twofold advantage. First, like all TPDs, it retains the square-root splitting even when nuisance fluctuations displace the sensing path from the exact degeneracy, provided the path crossing the nearby TED is non-tangential. Second, by removing the cube-root dependence of $\tilde{\nu}_0^\text{Root}$ on nuisance fluctuations, it minimizes the uncertainty propagated into the output spectrum, hence offering a practical operating point for TPD-based sensors.
+
+\section{\label{sec:discussion} Discussion}
+
+We have established a unified theoretical framework for TPDs and validated it using a cavity-magnonic platform with full digital control of all system parameters. We systematically investigated TPDs and developed figures of merit covering their locations in parameter space, signal susceptibility, robustness against nuisance drift, and thermal noise efficiency. Our architecture enables direct sensing of magnetic (through $\tilde{\Delta}_f$) and electric (through $\tilde{\Delta}_\kappa$) fields, with $\phi$ selecting the sensitive parameter. The tunability of our architecture enables exploration of the full TPD parameter space, though a deployed sensor would likely use fixed elements tuned to the robust TPD condition, which suppresses the response to nuisance fluctuations. Alternatively, the active elements can be used to explore nonlinear sensing or generate EP-enhanced magnonic frequency combs \cite{zheng_noise_2025, bai_observation_2024, wang_enhancement_2024}. Beyond sensing, the tunable complex coupling allows for the realization of complex non-Hermitian oscillator lattices that display different topological phases \cite{okugawa_topological_2019, tang_exceptional_2020}, or the study of synthetic photonic materials \cite{owens_quarter-flux_2018, kollar_hyperbolic_2019}, with potential extensions to higher-dimensional EP \cite{zhang_higher-order_2019, hodaei_enhanced_2017} and TPD degeneracies.
+
+\section{\label{sec:acknowledgements} Acknowledgments}
+
+The authors thank Joe Poissant for his support in designing and fabricating the 3D microwave cavities. We thank Hailey A. Mullen, Tian Xia, Sam Sacerdote, Divik Verma, Aidan Curtis, Vincent P. Flynn, Michiel Burgelman, and Lorenza Viola for valuable discussions and feedback on the manuscript. We thank Dr. Mukund Vengalattore for valuable guidance and support of the project. We gratefully acknowledge support from startup funds (Thayer School of Engineering, Dartmouth College), the DARPA Young Faculty Award No.~D23AP00192 (to M.F.), NSF Grant PHY-2412555, and NSF Research Traineeship (NRT) Grant DGE-2125733 (to support A.S.C.). The views, opinions, and/or findings expressed are those of the authors and should not be interpreted as representing the official views or policies of the U.S. Government.
+
+\section{\label{sec:author_contributions} Author Contributions}
+
+A.S.C.: Conceptualization, Methodology, Investigation, Formal Analysis, Software, Visualization, Data Curation, Resources, Validation, Writing – original draft, Writing – review \& editing.
+J.S.S.G.: Conceptualization, Methodology, Validation, Writing – review \& editing.
+S.B.: Formal Analysis, Validation, Writing – original draft, Writing – review \& editing.
+M.F.: Conceptualization, Methodology, Supervision, Resources, Validation, Funding Acquisition, Writing – review \& editing.
+
+%------
+
+\section{\label{appendix:a} Appendix A: Derivation of Dynamical Model}
+
+\subsection{Non-reciprocal Dissipative Magnon-Photon Coupling}
+
+We motivate the effective non-Hermitian Hamiltonian used in the main text by drawing a correspondence between the microwave network of Fig.~\ref{fig:platform}(a) and the dissipative magnon-photon coupling framework studied in cavity magnonics \cite{wang_dissipative_2020, fang_generalized_2017, wang_nonreciprocity_2019, clerk_introduction_2022}. In the standard electrodynamic picture, Amp\`{e}re's law describes a microwave current $\mathbf{j}$ generating an AC magnetic field that exerts a torque on the YIG magnetization $\mathbf{m}$, while Faraday's law describes the precessing magnetization inducing an electromotive force that acts back on the RF current. This bidirectional backaction is captured by a non-Hermitian term in the effective Hamiltonian and underlies phenomena such as phase non-reciprocity in hybrid magnon-photon systems.
+
+The microwave network reproduces this physics in a tunable form. The two modes are coupled via an interference loop containing directional amplifiers and a phase shifter, which sets the amplitude and phase of the forward ($f_y \to f_c$) and backward ($f_c \to f_y$) couplings independently. This produces an engineered asymmetry $J_{y\to c} \neq J_{c\to y}$ and thus non-reciprocal coupling. The outer transmission line serves as a common electromagnetic environment for both modes, analogous to the shared radiation channel in the electrodynamic framework, and the correlated dissipation arising from this common bath appears as off-diagonal damping in the effective dynamical matrix. A microscopic derivation of non-reciprocal magnon-photon interactions via traveling-wave amplifiers, consistent with our setup, is given in Refs.~\cite{yao_microscopic_2019, metelmann_nonreciprocal_2015}.
+
+The effective Hamiltonian for the coupled dimer is
+\begin{equation}\label{eq:Hamiltonian}
+\hat{H} = f_c \hat{a}_c^\dagger \hat{a}_c + f_y \hat{a}_y^\dagger \hat{a}_y + J \left( \hat{a}_c^\dagger \hat{a}_y + e^{i\phi} \hat{a}_y^\dagger \hat{a}_c \right),
+\end{equation}
+where $f_c$ and $f_y$ are the cavity and magnon mode frequencies. For $\phi=0$, the hopping term is Hermitian and describes coherent coupling. For $\phi=\pi$, the hopping term is anti-Hermitian in the convention of Eq.~\ref{eq:Hamiltonian}, corresponding to dissipative coupling. Intermediate phases continuously interpolate between coherent and dissipative components and can be used to realize phase-non-reciprocal dynamics. The next subsection adapts this Hamiltonian to include losses and drive terms, and takes the semiclassical limit to obtain the equations of motion used in the main text.
+
+\subsection{Theory for the Linear Model: Equations of Motion}
+
+We obtain the main-text equations of motion by augmenting Eq.~\ref{eq:Hamiltonian} with loss and drive terms and taking the semiclassical limit. In the frame rotating at the drive frequency $f_d$ and setting $\hbar = 1$, the full effective Hamiltonian takes the form
+\begin{align}
+H_{\text{eff}} &= (f_c - f_d) \hat{a}_c^\dagger \hat{a}_c + (f_y - f_d) \hat{a}_y^\dagger \hat{a}_y \nonumber \\
+&\quad - i \frac{\kappa_c}{2} \hat{a}_c^\dagger \hat{a}_c - i \frac{\kappa_y}{2} \hat{a}_y^\dagger \hat{a}_y \nonumber \\
+&\quad + J \left( \hat{a}_c^\dagger \hat{a}_y + e^{i\phi} \hat{a}_y^\dagger \hat{a}_c \right) \nonumber \\
+&\quad + u_c (\hat{a}_c^\dagger + \hat{a}_c) + u_y (\hat{a}_y^\dagger + \hat{a}_y),
+\end{align}
+where $u_c$ and $u_y$ are the drive amplitudes on the cavity and YIG modes. The anti-Hermitian diagonal terms encode on-site dissipation, and the phase $\phi$ in the hopping term tunes the coupling from coherent at $\phi=0$ to dissipative at $\phi=\pi$, with intermediate phases mixing the two.
+
+We rewrite $H_{\text{eff}}$ compactly as
+\begin{equation}\label{eq:dissipator}
+H_{\text{eff}} = H_0 - \frac{i}{2} \mathbf{L}^\dagger \boldsymbol{\Gamma} \mathbf{L},
+\end{equation}
+where $H_0$ collects the coherent terms (mode energies and drives), and
+\begin{equation}
+\mathbf{L} = \begin{pmatrix} \hat{a}_c \\ \hat{a}_y \end{pmatrix}, \quad
+\boldsymbol{\Gamma} = \begin{pmatrix} \kappa_c & 2iJ \\ 2iJ e^{i\phi} & \kappa_y \end{pmatrix},
+\end{equation}
+encode on-site dissipation (diagonal entries of $\boldsymbol{\Gamma}$) and the effective non-reciprocal coupling (off-diagonal entries). Replacing the operators $\hat{a}_{c,y}$ with complex amplitudes $\alpha_{c,y}$ yields the coupled semiclassical equations of motion
+\begin{widetext}
+\begin{equation}\label{eq:alphas}
+\frac{d}{dt}
+\begin{pmatrix} \alpha_c \\ \alpha_y \end{pmatrix}
+=
+\begin{pmatrix}
+-i(f_c - f_d) - \frac{\kappa_c}{2} & -iJ \\
+-iJ e^{i\phi} & -i(f_y - f_d) - \frac{\kappa_y}{2}
+\end{pmatrix}
+\begin{pmatrix} \alpha_c \\ \alpha_y \end{pmatrix}
++
+\begin{pmatrix} u_c \\ u_y \end{pmatrix}.
+\end{equation}
+\end{widetext}
+The $2 \times 2$ matrix is the dynamical matrix of the main text. An equivalent derivation via an intermediate third-mode construction is given in Ref.~\cite{rohn_classical_2023}.
+
+To obtain the nondimensional form used in the main text (Eq.~\ref{eq:model}), we divide all parameters by the coupling magnitude $J$ and denote normalized quantities with tildes. Moving to a frame co-rotating with $\tilde{f}_d$ removes it from the dynamical matrix, and introducing the detuning coordinates
+\begin{align}
+\tilde{\Delta}_f &\equiv \tilde{f}_c - \tilde{f}_y, \\
+\tilde{\Delta}_\kappa &\equiv (\tilde{\kappa}_c - \tilde{\kappa}_y)/2,
+\end{align}
+yields the nondimensional dynamical matrix $\tilde{\boldsymbol{A}}$ of Eq.~\ref{eq:model}.
+
+\subsection{\label{appendix-sec:petermann}Petermann Factor Analysis}
+
+Here we derive the Petermann factor used in the main text to locate EPs. The radicand of Eq.~\ref{eq:deltalambda_tilde} is generally complex, so we compute $\tilde{\Delta}_\lambda$ using the principal square-root branch, $\tilde{\Delta}_\lambda = \sqrt{|\tilde{\Delta}_\lambda|^2}\, e^{i \arg(\tilde{\Delta}_\lambda^2)/2}$ with $\arg(\tilde{\Delta}_\lambda^2) \in (-\pi, \pi]$. This choice ensures continuity of $\tilde{\Delta}_\lambda$ except at the branch points $\tilde{\Delta}_\lambda = 0$, which mark the candidate EP locations. However, eigenvalue coalescence alone does not distinguish an EP from an ordinary crossing, so we examine the eigenvectors through the Petermann factor.
+
+The Petermann factor matrix is $K_{j'j} = \langle L_{j'}|L_j\rangle \langle R_j|R_{j'}\rangle$, where $|R_j\rangle$ and $\langle L_j|$ are the right and left eigenvectors of $\tilde{\boldsymbol{A}}$ \cite{siegman_excess_1989, ashida_non-hermitian_2020}. Following Ref.~\cite{ashida_non-hermitian_2020}, we use the mean diagonal Petermann factor $\mathrm{PF} = \tfrac{1}{2}(K_{11} + K_{22})$, which diverges at EPs and equals unity for orthogonal eigenvectors \cite{zheng_mathcalpt_2010}. We compute $\mathrm{PF}$ from the spectral projectors
+\begin{equation}
+    P_\pm = -\oint_{C_\pm} \frac{dz}{2\pi i}\, R(z) = -\operatorname{Res}_{z = \tilde{\lambda}_\pm} R(z),
+\end{equation}
+where $R(z) = (\tilde{\boldsymbol{A}} - z\boldsymbol{I})^{-1}$. Symbolic residue calculation (Sec.~\ref{appendix:comp_methods}) yields
+\begin{equation}
+    \mathrm{PF} = \frac{1}{2}\left( \|P_+\|_2^2 + \|P_-\|_2^2 \right),
+\end{equation}
+with $\|M\|_2 = \sqrt{\operatorname{Tr}(M^\dagger M)}$ the Frobenius norm. Evaluating this expression for $\tilde{\boldsymbol{A}}$ (Eq.~\ref{eq:model}) reproduces the main-text result.
+
+%------
+
+\section{\label{appendix:b} Appendix B: Complete Parameterization of Surface of Transmission Peak Degeneracies}
+
+Here, we provide the full parameterization of the surface of TPDs surveyed in the Main Text. TPD locations are found by solving $\tilde{p} = \tilde{q} = 0$ for $\tilde{\Delta}_\kappa$ and $\tilde{\Delta}_f$ simultaneously (Sec.~\ref{appendix:comp_methods}).
+
+At $\phi = 0$, two primary TPDs lie on the $\tilde{\Delta}_\kappa$ axis for $\tilde{\kappa}_c \leq 2\sqrt{2}$, at $(\tilde{\Delta}_\kappa, \tilde{\Delta}_f) = \left(\tfrac{\tilde{\kappa}_c \pm \sqrt{8 - \tilde{\kappa}_c^2}}{2}, 0\right)$. For $\tilde{\kappa}_c \geq 2$, four additional rogue TPDs appear, at $(0, \pm\sqrt{\tilde{\kappa}_c^2 - 4})$ and $(\tilde{\kappa}_c, \pm\sqrt{\tilde{\kappa}_c^2 - 4})$.
+
+At $\phi = \pi$, two primary TPDs lie at $(0, \pm\sqrt{\tilde{\kappa}_c^2 + 4})$, with two additional rogue TPDs at $(\tilde{\kappa}_c, \pm\sqrt{\tilde{\kappa}_c^2 + 4})$.
+
+For all other $\phi$, the $\tilde{\Delta}_\kappa$ coordinates of the TPDs are the real solutions of
+{\small
+\begin{equation}
+2\tilde{\Delta}_\kappa^4 - 2\tilde{\kappa}_c \tilde{\Delta}_\kappa^3 - \tilde{\Delta}_\kappa^2\bigl(4\cos(\phi) - \tilde{\kappa}_c^2\bigr) + 4\cos^2(\phi) - 4 = 0,
+\end{equation}
+}
+and the corresponding $\tilde{\Delta}_f$ for each such $\tilde{\Delta}_\kappa$ is given by
+\begin{equation}
+\tilde{\Delta}_f = \frac{\tilde{\kappa}_c^2 \tilde{\Delta}_\kappa - 2\tilde{\kappa}_c \tilde{\Delta}_\kappa^2 + 2\tilde{\Delta}_\kappa^3 - 4 \tilde{\Delta}_\kappa\cos(\phi)}{2\sin(\phi)}.
+\end{equation}
+Two additional rogue TPDs lie at $(\tilde{\kappa}_c, \pm\sqrt{\tilde{\kappa}_c^2 - 4\cos(\phi)})$.
+
+\section{\label{appendix:c} Appendix C: Additional Results on Exceptional Points and Transmission Peak Degeneracies}
+
+\subsection{\label{appendix-sec:ep_hypersensitivity}Exceptional Point Nuisance Response}
+
+Unlike TPDs, which can be engineered for robustness against nuisance parameters, EPs are fundamentally fragile to nuisance fluctuations in two distinct ways. First, the square-root susceptibility that makes EPs attractive for sensing diverges along sensing and nuisance directions alike, rendering EPs nearly as responsive to drift as to the target signal. Second, and more severely, any nonzero nuisance perturbation lifts the degeneracy entirely, collapsing the square-root response to finite linear scaling. We demonstrate both effects for $\phi = 0$ below, where the same structure holds for $\phi = \pi$ with $\tilde{\Delta}_\kappa$ and $\tilde{\Delta}_f$ exchanged, and for general $\phi$ along the hyperbolic sensing path.
+
+For the $\phi = 0$ EP at $(\tilde{\Delta}_\kappa^\text{EP}, \tilde{\Delta}_f^\text{EP}) = (+2, 0)$, we substitute $\tilde{\Delta}_\kappa = 2 - \tilde{\epsilon}$ and $\tilde{\Delta}_f = \tilde{\delta}$ into Eq.~\ref{eq:deltalambda_tilde} and analyze the resulting eigenvalue splitting under sensing-only, nuisance-only, and combined perturbations (Sec.~\ref{appendix:comp_methods}).
+
+In the perfectly aligned case ($\tilde{\delta} = 0$), sensing-only perturbations yield the familiar square-root splitting $\operatorname{Im}(\tilde{\Delta}_\lambda) \approx \tilde{a}_\text{sqrt}^\text{EP}\sqrt{\tilde{\epsilon}}$ with $\tilde{a}_\text{sqrt}^\text{EP} = 2$. Nuisance-only perturbations ($\tilde{\epsilon} = 0$) produce the same square-root scaling $\operatorname{Im}(\tilde{\Delta}_\lambda) \approx \tilde{b}_\text{sqrt}^\text{EP}\sqrt{\tilde{\delta}}$ with $\tilde{b}_\text{sqrt}^\text{EP} = \sqrt{2}$, so the sensor cannot distinguish between the two. This is the first vulnerability.
+
+The second vulnerability emerges when both perturbations are present. Evaluating the sensing susceptibility $\tilde{\chi}_{\tilde{\epsilon}}^\text{EP} = \partial \operatorname{Im}(\tilde{\Delta}_\lambda)/\partial \tilde{\epsilon}$ at finite $\tilde{\delta}$ yields
+\begin{align}
+    \lim_{\tilde{\epsilon} \to 0^+} \tilde{\chi}_{\tilde{\epsilon}}^\text{EP} \bigg|_{\tilde{\delta} \neq 0} \propto \operatorname{Im}\left( \frac{4 + 2\tilde{\delta}\,i}{\sqrt{-\tilde{\delta}^2 + 4\tilde{\delta}\,i}} \right) < \infty.
+\end{align}
+Any nonzero $\tilde{\delta}$ regularizes the divergence to a finite value. Thus infinitesimal calibration errors, fabrication tolerances, or environmental drift are sufficient to destroy the square-root EP response entirely.
+
+\subsection{\label{appendix-sec:geometric_interp}Geometric Interpretation of Peaks and Imaginary Eigenvalues}
+
+Here, we include an additional perspective on the interpretation of peak locations, eigenvalues, EPs, and TPDs. There are special conditions for $\tilde{\kappa}_c$ such that EPs and TPDs coalesce into an EP-TPD pair. In Fig.~\ref{supp_fig:combined_drive_vector_geometric}, we show that these conditions occur for $\phi = 0$ at $\tilde{\kappa}_c = 2$ (Fig.~\ref{supp_fig:combined_drive_vector_geometric}(a.iii)), and for $\phi = \pi$ at $\tilde{\kappa}_c = 0$ (Fig.~\ref{supp_fig:combined_drive_vector_geometric}(b.i)). However, for all other $\tilde{\kappa}_c$, the locations of TPDs, EPs, $\tilde{\nu}_\pm$, and $|\text{Im}(\tilde{\lambda}_\pm)|$ are distinct. In particular, for $\phi = 0$, $\tilde{\nu}_\pm$ form ellipses whose semi-major ($\tilde{\Delta}_\kappa$) and semi-minor (frequency) axes scale with $\tilde{\kappa}_c$, while the ellipses formed by $|\text{Im}(\tilde{\lambda}_\pm)|$ stay constant with $\tilde{\kappa}_c$, providing a bound on $\tilde{\nu}_\pm$. For $\phi = \pi$, $\tilde{\nu}_\pm$ and $|\text{Im}(\tilde{\lambda}_\pm)|$ form hyperbolae, where the $\tilde{\nu}_\pm$ hyperbolae vertices drift outwards with $\tilde{\kappa}_c$. 
+
+\subsection{\label{appendix-sec:drive_readout_vector}Effect of Drive and Readout Configuration on Peak Locations}
+
+The Main Text considers only the configuration where the cavity is driven ($\bm{B} = [1,0]^{\mathrm T}$) and the YIG is read out ($\bm{C} = [0, 1]$), for which $\tilde{\beta}_{\mathrm{ss}}$ in Eq.~\ref{eq:beta_ss} takes the form $\tilde{\beta}_\mathrm{ss}=16/(A(\tilde{f}_d)^2 + B(\tilde{f}_d)^2)$, where $A$ and $B$ denote placeholders for the full quadratic and linear polynomials in $\tilde{f}_d$, respectively (Sec.~\ref{appendix:comp_methods}). The $\tilde{f}_d$-independent numerator allows the extrema condition $\partial \tilde{\beta}_{\mathrm{ss}}/\partial \tilde{f}_d = 0$ to reduce to the cubic of Eq.~\ref{eq:cubic}. Other input-output configurations yield qualitatively different behavior of the peak locations, whose transmission spectra do not admit this cubic decomposition. We analyze these configurations numerically in Fig.~\ref{supp_fig:combined_drive_vector_geometric} for $\phi = 0, \tilde{\kappa}_c =2$. For driving and reading out the cavity ($\bm{B} = [1,0]^{\mathrm T}$, $\bm{C} = [1, 0]$), $\phi = 0$ admits two TPDs (one not predicted by the Main Text theory (Fig.~\ref{supp_fig:combined_drive_vector_geometric}(c.ii))) while $\phi = \pi$ admits none (Fig.~\ref{supp_fig:combined_drive_vector_geometric}(d.ii)). For driving and reading out the YIG ($\bm{B} = [0, 1]^{\mathrm T}$, $\bm{C} = [0, 1]$), $\phi = 0$ admits one TPD (Fig.~\ref{supp_fig:combined_drive_vector_geometric}(c.iii)) and $\phi = \pi$ admits none (Fig.~\ref{supp_fig:combined_drive_vector_geometric}(d.iii)).
+
+\begin{figure*}
+\begin{centering}
+\includegraphics[width=0.98\textwidth]{prappl_submission/prappl_supp_figures/SUPP_combined_rp_arp_transmission.png}
+\end{centering}
+\caption{(a),(b) Geometric interpretation of the $\phi = 0$ and $\phi = \pi$ configurations. The imaginary eigenvalues, $|\text{Im}(\tilde{\lambda}_\pm)|$, do not change with $\tilde{\kappa}_c$, while the peak locations, $\tilde{\nu}_\pm$, do. Furthermore, the peak locations do not line up with the imaginary eigenvalues, but remain bounded by them. (c),(d) Simulations of $\tilde{\nu}_\pm$ for $\tilde{\kappa}_c =2$ and different drive/readout configurations. Panels (c.i),(d.i) depict drive cavity, readout YIG, $\bm{B} = [1,0]^{\mathrm T}, \bm{C} = [0, 1]$, for $\phi = 0$ and $\phi = \pi$, respectively, where theory presented in the Main Text holds. Panels (c.ii),(d.ii) depict drive/readout cavity configuration, $\bm{B} = [1,0]^{\mathrm T}, \bm{C} = [1,0]$, for $\phi = 0$ and $\phi = \pi$, respectively. Panels (c.iii),(d.iii) depict drive/readout YIG configuration, $\bm{B} = [0, 1]^{\mathrm T}, \bm{C} = [0, 1]$, for $\phi = 0$ and $\phi = \pi$, respectively. Dashed cyan lines depict mismatch between Main Text $\boldsymbol{\tilde{\Delta}}^\text{TPD}$ theory and alternate drive/readout configurations.}
+\label{supp_fig:combined_drive_vector_geometric}
+\end{figure*}
+
+\subsection{\label{appendix-sec:single_root}Single Root Closed-Form Solution}
+
+When $\text{Disc} < 0$, Eqs.~\ref{eq:theta}--\ref{eq:nu_minus} are invalid, as there is only one real root, $\tilde{\nu}_0^\text{Root}$. Its closed-form expression is given by the hyperbolic extension of Viète's trigonometric cubic solution~\cite{nickalls_viete_2006, holmes_use_2002} as
+\begingroup
+\small
+\begin{equation}\label{eq:hyperbolic_root}
+    \tilde{\nu}_0^\text{Root} = 
+    \begin{cases}
+        -2 \dfrac{|\tilde{q}|}{\tilde{q}} \sqrt{\dfrac{-\tilde{p}}{3}} 
+        \cosh\!\left[
+            \dfrac{1}{3} \, \mathrm{arcosh} \left(
+                \dfrac{-3|\tilde{q}|}{2\tilde{p}} \sqrt{\dfrac{-3}{\tilde{p}}}
+            \right)
+        \right],
+        & \text{if }  \tilde{p} < 0, \\[1.5ex]
+        -2 \sqrt{\dfrac{\tilde{p}}{3}} 
+        \sinh\!\left[
+            \dfrac{1}{3} \, \mathrm{arsinh} \left(
+                \dfrac{3\tilde{q}}{2\tilde{p}} \sqrt{\dfrac{3}{\tilde{p}}}
+            \right)
+        \right],
+        & \text{if } \tilde{p} > 0.
+    \end{cases}
+\end{equation}
+\endgroup
+Equation~\ref{eq:hyperbolic_root} is analyzed using a Puiseux expansion at the TPD in the $\boldsymbol{\tilde{\delta}}$ direction to obtain the nuisance scaling (Eqs.~\ref{eq:nu_root_phi_0_nuisance}--\ref{eq:nu_root_phi_pi_nuisance}) (Sec.~\ref{appendix:comp_methods}).
+
+\subsection{\label{appendix-sec:TNE_away}Thermal Noise Efficiency Away From Transmission Peak Degeneracies}
+
+The results in Sec.~\ref{subsec:additive_noise} imply that the thermal noise efficiency ($\mathrm{N}_\text{th}$) is closely related to the Petermann noise factor. However, while the expressions for the two noise factors are similar at $\boldsymbol{\tilde{\Delta}}^\text{TPD}$ coordinates, it is not a general relationship. In general, $\mathrm{N}_{\text{th}}$ diverges at instability transitions, while the Petermann factor diverges at EPs. Figure~\ref{supp_fig:tne} depicts $\mathrm{N}_{\text{th}}$ calculated on $\boldsymbol{\tilde{\Delta}}$-space, with exactly the same parameters as the Petermann factor landscape in Fig.~\ref{fig:theory}, depicting a significant difference in the behavior of $\mathrm{N}_{\text{th}}$ for parameters away from $\boldsymbol{\tilde{\Delta}}^\text{TPD}$. 
+
+\begin{figure}
+\centering
+\includegraphics[width=0.49\textwidth]{prappl_submission/prappl_supp_figures/supp_fig_TED_sqrt.png}
+\caption{Peak splitting at a TED depicted for $\phi = 0$, $\tilde{\kappa}_c = 1.18$. The main panel depicts the spectator root $\tilde{\nu}_+$ and the degenerate roots $(\tilde{\eta}, \tilde{\nu}_-)$ along the sweep, which split at the TED with initial splitting $\tilde{\Delta}_\nu^\text{TED}\neq0$ (green dashed vertical line). (a.i) Local geometry around the primary TPD (red circle). A sweep path (magenta) offset by nuisance $\tilde{\delta}(\tilde{\Delta}_f) = 10^{-3}$ intersects the $\mathrm{Disc} = 0$ contour (cyan dashed) at a TED (green circle), with incidence angle $\alpha \approx 12^\circ$ between the sweep direction and the local Disc=0 tangent. (a.ii) Peak splitting $\tilde{\Delta}_\nu$ along the sweep, with $\tilde{\Delta}_\nu^\text{TED}$ at the TED (green dashed horizontal line) and the square-root splitting coefficient $\tilde{a}_\text{sqrt}^\text{TED} = 0.62 > 0$.}
+\label{fig:TED_single_panel}
+\end{figure}
+
+\section{\label{appendix-sec:cusp}Appendix D: Transmission Extrema Degeneracies}
+
+TEDs occur along the $\mathrm{Disc} = 0$ contour where two roots of Eq.~\ref{eq:cubic} coalesce. While TPDs are third-order degeneracies where all three roots merge ($\tilde{\nu}_+ = \tilde{\nu}_- = \tilde{\eta}$), TEDs are second-order degeneracies where one transmission peak coalesces with the local minimum ($\tilde{\nu}_\pm = \tilde{\eta}$), leaving the other peak isolated. Crucially, a sensing path displaced from the TPD by nuisance fluctuations will still eventually cross the $\mathrm{Disc} = 0$ contour at a TED. In Sec.~\ref{appendix-subsec:TED_str}, we show that TED crossings still generally retain square-root splitting. 
+
+\subsection{\label{appendix-sec:vieta}Residual Splitting at a TED}
+
+At a TPD, all three roots of Eq.~\ref{eq:cubic} coalesce, so $\tilde{\Delta}_\nu = 0$. At a TED, only two roots coalesce while the third remains as a displaced spectator, so $\mathrm{Disc} = 0$ but $\tilde{\Delta}_\nu(\boldsymbol{\tilde{\Delta}}^\text{TED}) \neq 0$. This residual splitting is visible in Fig.~\ref{fig:TED_single_panel}(a.ii) as the gap between the upper branch ($\tilde{\nu}_+$, the spectator) and the coalesced lower pair ($\tilde{\eta}, \tilde{\nu}_-$, the repeated roots) at the TED. We denote this residual peak splitting as $\tilde{\Delta}_\nu^\text{TED}$ for brevity. Here, we derive the residual peak splitting $\tilde{\Delta}_\nu^\text{TED}$ using Viète's relations, which relate the roots of Eq.~\ref{eq:cubic} to its coefficients. At a TED, the relations, written in terms of $r$ for the repeated root and $s$ for the spectator root, become
+\begin{align}
+       2r + s &= 0, \label{eq:vieta1} \\
+       r^2 + 2rs &= \tilde{p}, \label{eq:vieta2} \\
+       r^2 s &= -\tilde{q}. \label{eq:vieta3}
+\end{align}
+The residual splitting is $\tilde{\Delta}_\nu^\text{TED} = |r - s|$. Solving for $r$ and $s$ in terms of $\tilde{q}$ yields
+\begin{equation}\label{eq:residual_splitting}
+    \tilde{\Delta}_\nu^\text{TED} = \frac{3}{2^{1/3}} |\tilde{q}|^{1/3}.
+\end{equation}
+Expanding Eq.~\ref{eq:residual_splitting} at the TPD in the nuisance direction $\boldsymbol{\tilde{\delta}}$ gives the residual splitting as a function of nuisance perturbation (Sec.~\ref{appendix:comp_methods}):
+\begin{align}
+    \tilde{\Delta}_\nu^\text{TED}(\phi = 0) &= \frac{3 \cdot 2^{2/3} \left|\tilde{\kappa}_c^2 - 4\right|^{1/3}}{4} \left|\tilde{\delta}(\tilde{\Delta}_f)\right|^{1/3}, \label{eq:min_nu_growth_phi_0} \\
+    \tilde{\Delta}_\nu^\text{TED}(\phi = \pi) &= \frac{3\tilde{\kappa}_c^{1/3} \left(\tilde{\kappa}_c^2 + 4\right)^{1/6}}{2} \left|\tilde{\delta}(\tilde{\Delta}_\kappa)\right|^{1/3}. \label{eq:min_nu_growth_phi_pi}
+\end{align}
+Equations~\ref{eq:min_nu_growth_phi_0}--\ref{eq:min_nu_growth_phi_pi} exhibit the same cube-root nuisance dependence as Eqs.~\ref{eq:nu_root_phi_0_nuisance}--\ref{eq:nu_root_phi_pi_nuisance}. $\tilde{\Delta}_\nu^\text{TED}$ is depicted in Fig.~\ref{fig:TED_single_panel} (dashed green line). 
+
+\subsection{\label{appendix-subsec:TED_str}Square-Root Splitting at TEDs}
+
+Here we outline the mechanics that determine when sensing paths crossing a TED retain square-root peak splitting. We analyze the roots directly through the Viète trigonometric expressions of Eqs.~\ref{eq:theta}--\ref{eq:nu_minus}. At a TED, $\tilde{p}^\text{TED} \neq 0$ and $\tilde{q}^\text{TED} \neq 0$, so the Viète relations of Sec.~\ref{appendix-sec:vieta} yield nondegenerate spectator and repeated roots. Without loss of generality, we assign the roots at the TED such that $\tilde{\nu}_+^\text{TED}$ is the distinct spectator peak and $\tilde{\eta}^\text{TED} = \tilde{\nu}_-^\text{TED}$ are the degenerate, coalesced roots. This assignment matches the numerical example in Fig.~\ref{fig:TED_single_panel}. In this section, we drop the $\tilde{\nu}^\text{Root}$ superscript used in Sec.~\ref{subsec:transmission_spectrum} for notational brevity, letting $\tilde{\nu}_+, \tilde{\nu}_-, \tilde{\eta}$ represent the unshifted roots.
+
+Next, we consider the introduction of a sensing perturbation $\boldsymbol{\tilde{\epsilon}} \equiv \lVert \boldsymbol{\tilde{\epsilon}} \rVert \boldsymbol{\hat{\epsilon}}$ off the TED, which in the scenario of Fig.~\ref{fig:TED_single_panel} corresponds to moving along the magenta sweep path across the $\mathrm{Disc} = 0$ contour (dashed cyan). In the main text (Sec.~\ref{section:design_guidance}), we assume $\boldsymbol{\tilde{\epsilon}}$ is strictly aligned with $\tilde{q} = 0$. Since TEDs occur away from $\tilde{q} = 0$, we relax this condition here. Subject to $\boldsymbol{\tilde{\epsilon}}$, the cubic coefficients expand to first order as $\tilde{p}(\boldsymbol{\tilde{\Delta}}^\text{TED} + \boldsymbol{\tilde{\epsilon}}) \approx \tilde{p}^\text{TED} + p_1 \lVert \boldsymbol{\tilde{\epsilon}} \rVert$ and $\tilde{q}(\boldsymbol{\tilde{\Delta}}^\text{TED} + \boldsymbol{\tilde{\epsilon}}) \approx \tilde{q}^\text{TED} + q_1 \lVert \boldsymbol{\tilde{\epsilon}} \rVert$, where $p_1 = \nabla_{\boldsymbol{\tilde{\Delta}}} \tilde{p} \cdot \boldsymbol{\hat{\epsilon}}$ and $q_1 = \nabla_{\boldsymbol{\tilde{\Delta}}} \tilde{q} \cdot \boldsymbol{\hat{\epsilon}}$ are the directional gradients along the sensing path.
+
+We track the corresponding root shifts by Puiseux-expanding Eqs.~\ref{eq:theta}--\ref{eq:nu_minus} in $\lVert\boldsymbol{\tilde{\epsilon}}\rVert$. The arccos in Eq.~\ref{eq:theta} has a square-root branch point at the endpoints of its domain, and at a TED the arccos argument $Z \equiv (3\tilde{q})/(2\tilde{p})\sqrt{-3/\tilde{p}}$ saturates at $\pm 1$. The root assignment introduced above corresponds to the $Z = +1$ branch, which we adopt for the remainder of this derivation. This saturation is the algebraic signature of the discriminant vanishing, and it is the source of $\sqrt{\lVert\boldsymbol{\tilde{\epsilon}}\rVert}$ scaling in the peak splitting. Let $Z_1$ denote the directional derivative of the arccos argument along $\boldsymbol{\hat{\epsilon}}$, with (Sec.~\ref{appendix:comp_methods})
+\begin{equation}\label{eq:Z1_def}
+    Z_1 \equiv -\frac{3\,\sqrt{3}\,q_1 -3\,p_1 \,\sqrt{-\tilde{p}^\text{TED} }}{2\,{{\left(-\tilde{p}^\text{TED} \right)}}^{3/2} }.
+\end{equation}
+
+Next, we propagate $\arccos(1 + Z_1 \lVert \boldsymbol{\tilde{\epsilon}} \rVert)$ through the cosines in Eqs.~\ref{eq:nu_plus}--\ref{eq:nu_minus}, yielding the leading frequency shifts, with
+\begin{align}
+    \Delta\tilde{\nu}_+ &\approx \mathcal{O}(\lVert\boldsymbol{\tilde{\epsilon}}\rVert), \label{eq:ted_spectator_shift}\\
+    \Delta\tilde{\eta} &\approx +\frac{1}{3}\sqrt{2|\tilde{p}^\text{TED}||Z_1|}\sqrt{\lVert\boldsymbol{\tilde{\epsilon}}\rVert} + \mathcal{O}(\lVert\boldsymbol{\tilde{\epsilon}}\rVert), \label{eq:ted_eta_shift}\\
+    \Delta\tilde{\nu}_- &\approx -\frac{1}{3}\sqrt{2|\tilde{p}^\text{TED}||Z_1|}\sqrt{\lVert\boldsymbol{\tilde{\epsilon}}\rVert} + \mathcal{O}(\lVert\boldsymbol{\tilde{\epsilon}}\rVert). \label{eq:ted_nu_minus_shift}
+\end{align}
+The spectator $\tilde{\nu}_+$ shifts purely linearly, consistent with the smooth upper branch in Fig.~\ref{fig:TED_single_panel}(a). The pair $\tilde{\eta}$ and $\tilde{\nu}_-$ splits symmetrically around its degenerate value with leading square-root scaling, producing the bifurcation visible at the TED in Fig.~\ref{fig:TED_single_panel}(a). Note that the mixture of both half-integer and integer powers in this expansion is specific to TEDs. At TPDs the prefactor $\sqrt{-\tilde{p}/3}$ vanishes, so the Viète form breaks down and direct Puiseux expansion yields pure sublinear powers instead.
+
+The peak splitting follows directly. Combining Eqs.~\ref{eq:ted_spectator_shift}--\ref{eq:ted_nu_minus_shift} gives
+\begin{equation}\label{eq:ted_splitting_Z1}
+    \tilde{\Delta}_\nu \approx \tilde{\Delta}_\nu^\text{TED} + \frac{1}{3}\sqrt{2|\tilde{p}^\text{TED}||Z_1|}\sqrt{\lVert\boldsymbol{\tilde{\epsilon}}\rVert} + \mathcal{O}(\lVert\boldsymbol{\tilde{\epsilon}}\rVert),
+\end{equation}
+where $\tilde{\Delta}_\nu^\text{TED}$ is the residual splitting at the TED itself (green dashed line in Fig.~\ref{fig:TED_single_panel}(a)).
+
+Next, we seek to relate $Z_1$ to physically relevant operational parameters. Both $Z_1$ and the directional derivative of $\mathrm{Disc}$ along $\boldsymbol{\hat{\epsilon}}$ are computed from the same $p_1$ and $q_1$, with
+\begin{equation}\label{eq:ted_Z1_to_disc}
+    \left.\frac{d\mathrm{Disc}}{d\lVert\boldsymbol{\tilde{\epsilon}}\rVert}\right|_\text{TED} = 8(\tilde{p}^\text{TED})^3 Z_1
+\end{equation}
+(see Sec.~\ref{appendix:comp_methods}). Expressing the discriminant's directional derivative in geometric form gives
+\begin{equation}\label{eq:disc_taylor}
+    \left.\frac{d\mathrm{Disc}}{d\lVert\boldsymbol{\tilde{\epsilon}}\rVert}\right|_\text{TED} = \lVert\nabla_{\boldsymbol{\tilde{\Delta}}}\mathrm{Disc}^\text{TED}\rVert \, \sin(\alpha),
+\end{equation}
+where $\alpha$ is the angle of incidence between the sensing path $\boldsymbol{\hat{\epsilon}}$ and the tangent line to the local $\mathrm{Disc} = 0$ contour. Equating Eqs.~\ref{eq:ted_Z1_to_disc}--\ref{eq:disc_taylor} and taking magnitudes (only the branch with $\mathrm{Disc} > 0$ produces the split-peak response) yields $|Z_1| = \lVert\nabla_{\boldsymbol{\tilde{\Delta}}}\mathrm{Disc}^\text{TED}\rVert\,|\sin(\alpha)|\,/\,8|\tilde{p}^\text{TED}|^3$. Substituting this into Eq.~\ref{eq:ted_splitting_Z1} gives the observable peak-splitting coefficient
+\begin{equation}\label{eq:ted_asqrt}
+    \tilde{a}_\text{sqrt}^\text{TED} \equiv \frac{\sqrt{\lVert\nabla_{\boldsymbol{\tilde{\Delta}}}\mathrm{Disc}^\text{TED}\rVert}}{6|\tilde{p}^\text{TED}|}\sqrt{|\sin(\alpha)|},
+\end{equation}
+and the full peak-splitting response becomes
+\begin{equation}\label{eq:ted_str}
+    \tilde{\Delta}_\nu(\boldsymbol{\tilde{\Delta}}^\text{TED} + \boldsymbol{\tilde{\epsilon}}) \approx \tilde{\Delta}_\nu^\text{TED} + \tilde{a}_\text{sqrt}^\text{TED} \sqrt{\lVert\boldsymbol{\tilde{\epsilon}}\rVert} + \mathcal{O}(\lVert\boldsymbol{\tilde{\epsilon}}\rVert).
+\end{equation}
+The prefactor $\tilde{a}_\text{sqrt}^\text{TED}$ is finite for any non-grazing crossing ($\alpha \neq 0$), demonstrating that TEDs generally retain square-root splitting, as seen in the $\tilde{a}_\text{sqrt}^\text{TED} = 0.62 > 0$ labeled in Fig.~\ref{fig:TED_single_panel}(a.ii).
+
+Finally, for the linear geometric term (Eq.~\ref{eq:disc_taylor}) to accurately dominate the expansion, the sensing perturbation must remain bounded by the local curvature of the discriminant field. This establishes a single, approximate dynamic range condition for the square-root response that subsumes all prior linear approximations:
+\begin{equation}\label{eq:ted_bound}
+    \lVert\boldsymbol{\tilde{\epsilon}}\rVert \ll \frac{2\lVert\nabla_{\boldsymbol{\tilde{\Delta}}}\mathrm{Disc}^\text{TED}\rVert}{\lvert \boldsymbol{\hat{\epsilon}}^\top \mathbf{H}^\text{TED} \boldsymbol{\hat{\epsilon}} \rvert} |\sin(\alpha)|,
+\end{equation}
+where $\mathbf{H}^\text{TED}$ is the Hessian matrix of $\mathrm{Disc}(\boldsymbol{\tilde{\Delta}})$ evaluated at the TED. If the Hessian vanishes, the next nonzero higher-order derivative
+along the path sets the corresponding bound. The factor of two arises from comparing the linear term in Eq.~\ref{eq:disc_taylor} to the Hessian contribution in the second-order Taylor expansion. This formalism breaks down at TPDs, where the discriminant gradient vanishes ($\lVert\nabla_{\boldsymbol{\tilde{\Delta}}}\mathrm{Disc}^\text{TPD}\rVert \to 0$). At TPDs, the square-root splitting with respect to $\boldsymbol{\tilde{\epsilon}}$ and sublinear splitting with respect to $\boldsymbol{\tilde{\delta}}$ must instead be analyzed using direct Puiseux expansions as in Sec.~\ref{section:design_guidance}.
+
+\subsection{\label{appendix-sec:cusp_cat}Cusp Geometry and TED Location}
+The two non-robust configurations in Fig.~\ref{fig:parametric} have comparable cube-root nuisance coefficients (given by Eq.~\ref{eq:nu_root_phi_0_nuisance}), but Fig.~\ref{fig:parametric} shows a much stronger asymmetry in the propagated peak uncertainty. This additional asymmetry arises from the local cusp geometry. Specifically, nuisance perturbations shift not only the single peak frequency but also displace the TED location along the $\mathrm{Disc} = 0$ contour, leading to rapid change in $\lVert \boldsymbol{\tilde{\Delta}}^\text{TED} - \boldsymbol{\tilde{\Delta}}^\text{TPD} \rVert$ as a function of $\boldsymbol{\tilde{\delta}}$. We quantify this displacement by Taylor-expanding $\mathrm{Disc} = 0$ about the TPD along the nuisance direction and solving for the TED location (Sec.~\ref{appendix:comp_methods}). For $\phi = 0$ and $\phi = \pi$, this yields
+\begin{align}
+    \lvert\tilde{\Delta}_\kappa^\text{TED} - \tilde{\Delta}_\kappa^\text{TPD}\rvert &\approx \frac{3 \cdot 2^{1/3} \lvert\tilde{\kappa}_c^2 - 4\rvert^{2/3}}{4\sqrt{8 - \tilde{\kappa}_c^2}} \left|\tilde{\delta}(\tilde{\Delta}_f)\right|^{2/3}, \label{eq:mu_growth_phi_0} \\
+    \lvert\tilde{\Delta}_f^\text{TED} - \tilde{\Delta}_f^\text{TPD}\rvert &\approx \frac{3\tilde{\kappa}_c^{2/3}}{2(\tilde{\kappa}_c^2 + 4)^{1/6}} \left|\tilde{\delta}(\tilde{\Delta}_\kappa)\right|^{2/3}. \label{eq:mu_growth_phi_pi}
+\end{align}
+Both expressions exhibit the characteristic $|\tilde{\delta}|^{2/3}$ cusp scaling, and Eq.~\ref{eq:mu_growth_phi_0} vanishes at $\tilde{\kappa}_c = 2$, recovering the robust TPD condition. 
+
+\begin{figure}
+\centering
+\includegraphics[width=0.48\textwidth]
+{prappl_submission/prappl_supp_figures/FIG_2_theory_small_NEF.png}
+\caption{Theory for $\phi = 0$ (a),(b), $\phi = \pi$ (c),(d), and $\phi = \pi/2$ (e),(f) overlaid atop $\mathrm{N}_\text{th}$ (clipped to 90th percentile), using the exact parameters as Fig.~\ref{fig:theory} to depict the contrast between the Petermann factor and $\mathrm{N}_\text{th}$.}
+\label{supp_fig:tne}
+\end{figure}
+
+\section{\label{appendix:d} Appendix E: Experimental Methods}
+
+\begin{figure*}[ht!]
+\centering
+\includegraphics[width=0.98\textwidth]{prappl_submission/prappl_supp_figures/SUPP_expr_diagram.png}
+\caption{Experimental implementation. (a) Closed-loop configuration of coupled cavity and YIG mode, including switches to change between drive/readout operating modes, self-feedback loops, and all experimental devices. All devices, except for the amplifier, are controlled using a Python API. (b) Schematic of the microwave drive and readout circuitry, utilizing IQ mixers and a shared local oscillator to enable signal generation and detection.}
+\label{supp_fig:expr_diagram}
+\end{figure*}
+
+\subsection{\label{appendix-sec:methods-device} Device Description}
+
+Our measurement setup includes a vector network analyzer (Quantum Machines OPX+ Quantum Controller) and a local oscillator (SignalCore SC5511A) for collecting the data displayed in the Main Text. The device under test consists of a custom-built microwave cavity with mechanically tunable frequency and output-port coupling rates and a custom-built oscillator realized from a 1~mm diameter YIG sphere, placed on top of a coplanar waveguide (Minicircuits CMA-83LN+ with evaluation board TB-994+). The YIG sphere is coupled to the ground using orthogonal wire bonds. Magnon and photon modes are coupled over a meter-scale distance using flexible SMA wires (Minicircuits 086-11SM+). To achieve variable gain amplification and tunable coupling, we place a fixed-gain amplifier (Minicircuits CMA-83LN+), directly followed by a digital attenuator (Vaunix LDA-5018V), and tune the attenuation digitally using the Vaunix Python API. A digital phase shifter (Vaunix LPS-802) modifies the phase for hopping between the cavity and YIG. 
+
+We use three digital switches to probe each mode individually during experimental operation without modifying the apparatus. Two Vaunix LSW-802P4T switches (1-input, 4-output) are used on the drive and readout lines to select which mode is being driven or read out. A 1-input, 2-output (Vaunix LSW-802PDT) switch is included on one of the coupling wires to disable or enable coupling when probing each mode individually. When disabled, the signal is routed directly to a 50-$\Omega$ terminator to ensure impedance matching and reduce reflections. Furthermore, when coupling is disabled, all digital attenuators are set to their maximum attenuation (50 dB) to provide additional isolation. Directional couplers (Minicircuits ZADC-13-73-S+) drive and read out each mode, attaching to the self-feedback loops. 
+
+Experimental control of parameters is achieved through a Python API. $f_y$ is primarily tuned using an external magnetic field controlled by an electromagnet driven by a digital current source (SRS CS580). We offset the frequency of the YIG to 6 GHz using a fixed neodymium magnet and finely tune $B_z$ using the current source. To modify $\kappa_y$ with high resolution, we insert an analog voltage-controlled attenuator (Analog Devices HMC812ALC4 integrated with EV1 eval board) on the YIG self-feedback loop, and modify the voltage using a precision voltage source (SRS DC205). A full schematic of the experimental apparatus is depicted in Fig.~\ref{supp_fig:expr_diagram}.
+
+\subsection{\label{appendix-sec:methods-calibration} Parameter Calibration}
+
+During an experimental sweep, all the parameters $f_c, f_y, \kappa_c, \kappa_y, J, \phi$ are necessary for data analysis. Parameters $f_c, f_y, \kappa_c, \kappa_y$ are measured during each step of the independent variable, using the RF-switch-based probing method described in Sec.~\ref{appendix-sec:methods-device}. To determine $\phi$, we use the experimental apparatus to set $f_c = f_y$ and $\kappa_c = \kappa_y$, then couple the two modes together and change the digital phase shifter until the hybridized peaks are the same height in transmission, which defines the phase origin, $\phi = 0$. Finally, $J$ is a fitted parameter, extracted once for each value of loop attenuation and loop phase.
+
+\subsection{\label{appendix-sec:methods-control} Parameter Control System}
+
+To follow arbitrary paths in $\boldsymbol{\Delta}$-space, we model the relationship between coil current ($I$), analog attenuator voltage ($V$), and the measured mode parameters $(f_y, \kappa_y)$ using a simple system identification method. The pair $(I, V)$ is swept over a dense grid of $N = 1200$ points. At each $(I, V)$ we measure $(f_y, \kappa_y)$ via a Lorentzian fit of transmission. To capture the weak nonlinearities of the voltage-controlled attenuator we use the feature vector $\vec{\psi}(I, V) = [I, V, IV, V^2, 1]^T$ and perform least-squares regression using NumPy to obtain a weight matrix $\Theta \in \mathbb{R}^{5\times 2}$ which maps features to predicted outputs as
+\begin{equation}
+\begin{bmatrix}
+\hat{f}_y \\
+\hat{\kappa}_y
+\end{bmatrix}  = \Theta^T \cdot \vec{\psi}(I,V).
+\end{equation}
+The model achieves $R^2 \approx 0.995$ for both $f_y$ and $\kappa_y$, with RMSE on the order of $10$~kHz.
+
+During an experimental sweep, this model serves as a feedforward map from control inputs $(I,V)$ to predicted outputs $(\hat{f}_y, \hat{\kappa}_y)$. The inverse problem is solved via Newton’s method to find the input required to attain a specified target. At each iteration, a new measurement of $(f_y, \kappa_y)$ is taken, and every 5 iterations, a new measurement of $(f_c, \kappa_c)$ is taken to account for noise in the cavity. We calculate $(\Delta_f, \Delta_\kappa)$ and the absolute error relative to the target $(\Delta_f^\text{Target}, \Delta_\kappa^\text{Target})$, and construct a Jacobian analytically from the regression model. A damped Newton update with gain matrix $K_p = \mathrm{diag}([0.8, 0.8])$ is applied to $(I,V)$, and the process repeats until the error is within a specified tolerance, $\Delta_f^\text{err}, \Delta_\kappa^\text{err} = [10^{-5}, 10^{-5}]$. This protocol enables tracking of arbitrary paths in $(\Delta_f, \Delta_\kappa)$ using only a learned model and analytical Jacobian. 
+
+\subsection{\label{appendix-sec:methods-data-analysis} Data Analysis}
+
+In the Main Text, we strictly use nondimensionalized parameters to present the data. However, when performing data analysis, we use the dimensional parameters, and scale by $J$ at the end. When probing the YIG or cavity individually using the RF-switch-based isolation method, we convert the output data extracted from the OPX+ Quantum Controller into a linear scale and fit the data to a Lorentzian profile. From the fit, we extract $f_c, f_y, \kappa_c, \kappa_y$, and $\sigma(f_c), \sigma(f_y), \sigma(\kappa_c), \sigma(\kappa_y)$ using the elements of the least squares regression covariance matrix. Then, for data where the coupling is enabled, we fit $\nu_\pm$ to the data using $f_c, f_y, \kappa_c, \kappa_y$, and $J$, reported as experimental data in the Main Text as $\tilde{\nu}_\pm$. To quantify the fit uncertainty of $\nu_\pm$, we fit the data $N = 10^4$ times drawing from a multivariate normal distribution in $f_c, f_y, \kappa_c, \kappa_y$ with uncertainties $\sigma(f_c), \sigma(f_y), \sigma(\kappa_c), \sigma(\kappa_y)$. For each shot in $N$, we calculate $\nu_\pm$, yielding a distribution $\mathcal{D}(\nu_\pm)$ with standard deviation $\sigma(\nu_\pm)$. The error bars in the Main Text are $\sigma(\nu_\pm)/J$, a measure of the propagation of uncertainty of the fit parameters to the peak locations of the coupled system. 
+
+We also seek to obtain a measure of global uncertainty across the entire experiment, accounting for variations in $\kappa_c$ across an entire sweep. The average $\kappa_c$ is reported in the form $\tilde{\kappa}_c$, with experimental uncertainty $\sigma_\text{exp}(\tilde{\kappa}_c)$ equal to the standard deviation of $\kappa_c$ across the sweep. The location of EPs, TPDs, and instability transitions are calculated using $J$ and $\kappa_c$. $\sigma_\text{exp}(\kappa_c)$ propagates to the location of EPs, TPDs, and instability, which we report in the Main Text. For $\phi = 0$ and $\phi = \pi$, a closed-form solution for the propagation of uncertainty from $\tilde{\kappa}_c$ exists. For other values of $\phi$, the TPD locations are given by the roots of a quartic equation (see Sec.~\ref{appendix:b}), so uncertainty is propagated by Monte Carlo instead. Beyond the instability transition, the linear model is no longer valid, and the experimental results are no longer well-described by $\tilde{\beta}_{\mathrm{ss}}$. An exploration of nonlinear phenomena in a similar system can be found in Ref. \cite{salcedo-gallo_demonstration_2025}.
+
+\subsection{\label{appendix-sec:yig_ferro}YIG Ferromagnetic Resonance}
+
+Although YIG is technically ferrimagnetic, we ensure the material is driven into magnetic saturation. In this regime, the net magnetization precesses uniformly, and the standard ferromagnetic formalism can accurately describe its dynamics. Several factors ensure the validity of this approximation. First, the saturation magnetization of our YIG sample is $\mu_0M_s = 0.178$ T, and we apply a bias field exceeding this value using permanent neodymium magnets. Second, the YIG sample is spherical, eliminating shape-dependent demagnetization effects since the demagnetization factors are isotropic \cite{osborn_demagnetizing_1945}. Third, thermal effects can be neglected in our regime, as the Curie temperature of YIG ($\sim560$K) \cite{zhang_cavity_2015} is far above our room temperature operating conditions.
+
+\section{\label{appendix:notation}Appendix F: Summary of Notation}
+
+The table below collects the symbols introduced throughout the paper, grouped by physical role. Quantities marked with a tilde are nondimensional and normalized by the coupling magnitude $J$ (e.g., $\tilde{f}_c \equiv f_c/J$, $\tilde{\kappa}_c \equiv \kappa_c/J$); this choice absorbs the platform-specific coupling strength so that all degeneracy conditions, figures of merit, and stability boundaries are expressed in $J$-units and therefore apply uniformly across any realization of the two-mode dynamics. Bold symbols such as $\boldsymbol{\tilde{\Delta}} \equiv (\tilde{\Delta}_\kappa,\tilde{\Delta}_f)$ denote two-dimensional vectors in the detuning plane, with superscripts ($\mathrm{EP}$, $\mathrm{TPD}$, $\mathrm{TED}$, $\mathrm{NL}$) marking specific locations or boundaries in this space.
+
+\begin{widetext}
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}l l c l@{}}
+\toprule
+\textbf{Symbol} & \textbf{Description} & \textbf{Units} & \textbf{Defined} \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Dimensional platform parameters}} \\
+$f_c,\ f_y$                 & Cavity and YIG mode frequencies                                      & Hz            & Sec.~\ref{sec:arch} \\
+$\kappa_c,\ \kappa_y$       & Loaded FWHM linewidths of the cavity and YIG modes                            & Hz            & Sec.~\ref{sec:arch} \\
+$\bar{\kappa}$              & Average dissipation, $(\kappa_c+\kappa_y)/2$                                  & Hz            & Sec.~\ref{sec:arch} \\
+$J$                         & Magnitude of the complex coupling; sets the normalization scale               & Hz            & Sec.~\ref{sec:arch} \\
+$\phi$                      & Coupling phase: $\phi=0$ ($\mathcal{PT}$), $\phi=\pi$ (anti-$\mathcal{PT}$), else anyonic-$\mathcal{PT}$ & rad & Sec.~\ref{sec:arch} \\
+$B_z$                       & Static magnetic bias field applied to the YIG sphere                          & T             & Sec.~\ref{sec:arch} \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{State-space model}} \\
+$\tilde{\boldsymbol{\alpha}}$           & Normalized coherent state amplitudes $[\tilde{\alpha}_c,\tilde{\alpha}_y]^{\mathrm{T}}$ (photon, magnon) & --  & Eq.~\ref{eq:time_dep} \\
+$\tilde{f}_d$                           & Normalized drive frequency                                                    & --  & Eq.~\ref{eq:alpha_ss} \\
+$\tilde{u}$                             & Normalized drive strength                                                     & --  & Eq.~\ref{eq:time_dep} \\
+$\boldsymbol{B},\ \boldsymbol{C}$       & Drive (readout) vectors, each in $\{[1,0]^{\mathrm{T}},[0,1]^{\mathrm{T}}\}$ ($\{[1,0],[0,1]\}$) & -- & Eqs.~\ref{eq:time_dep}, \ref{eq:beta_ss} \\
+$\tilde{\boldsymbol{A}}$                & Nondimensional dynamical system matrix                                        & --  & Eq.~\ref{eq:model} \\
+$\tilde{\beta}_{\mathrm{ss}}$           & Steady-state transmission spectrum                                            & --  & Eq.~\ref{eq:beta_ss} \\
+$\tilde{\boldsymbol{G}}$                & Green's function, $(i\tilde{f}_d\boldsymbol{I}+\tilde{\boldsymbol{A}})^{-1}$  & --  & Sec.~\ref{subsec:additive_noise} \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Normalized detuning coordinates (all in units of $J$)}} \\
+$\tilde{\Delta}_f$          & Frequency detuning, $\tilde{f}_c-\tilde{f}_y$                                 & --  & Eq.~\ref{eq:model} \\
+$\tilde{\Delta}_\kappa$     & Dissipation asymmetry, $(\tilde{\kappa}_c-\tilde{\kappa}_y)/2$                & --  & Eq.~\ref{eq:model} \\
+$\boldsymbol{\tilde{\Delta}}$ & Two-dimensional detuning vector, $(\tilde{\Delta}_\kappa,\tilde{\Delta}_f)$ & --  & Sec.~\ref{subsec:eigenvalues} \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Eigenspectrum}} \\
+$\tilde{\lambda}_\pm$       & Eigenvalues of $\tilde{\boldsymbol{A}}$                                       & --  & Eq.~\ref{eq:lambda0_tilde} \\
+$\tilde{\Delta}_\lambda$    & Eigenvalue splitting, $\sqrt{(\tilde{\Delta}_\kappa+i\tilde{\Delta}_f)^2-4e^{i\phi}}$ & -- & Eq.~\ref{eq:deltalambda_tilde} \\
+$\mathrm{PF}$               & Petermann factor; diverges at EPs                                             & --  & Sec.~\ref{subsec:eigenvalues} \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Transmission extrema and degeneracy locations}} \\
+$\tilde{p},\ \tilde{q}$     & Depressed-cubic coefficients                                                  & --  & Eqs.~\ref{eq:p}, \ref{eq:q} \\
+$\mathrm{Disc}$             & Cubic discriminant, $-4\tilde{p}^3-27\tilde{q}^2$                             & --  & Eq.~\ref{eq:disc_algebraic} \\
+$\tilde{\nu}_\pm$           & Transmission peak frequencies (two-peak regime, $\mathrm{Disc}>0$)            & --  & Sec.~\ref{subsec:transmission_spectrum} \\
+$\tilde{\nu}_0$             & Single transmission peak frequency ($\mathrm{Disc}<0$)                        & --  & Sec.~\ref{subsec:transmission_spectrum} \\
+$\tilde{\eta}$              & Frequency of the local minimum between $\tilde{\nu}_\pm$ ($\mathrm{Disc}>0$)    & --  & Sec.~\ref{subsec:transmission_spectrum} \\
+$\tilde{\nu}_\pm^{\mathrm{Root}},\ \tilde{\nu}_0^{\mathrm{Root}},\ \tilde{\eta}^{\mathrm{Root}}$ & Roots of Eq.~\ref{eq:cubic}; unshifted versions of $\tilde{\nu}_\pm,\tilde{\nu}_0,\tilde{\eta}$ (offset by $\tilde{f}_c-\tilde{\Delta}_f/2$) & -- & Sec.~\ref{subsec:transmission_spectrum} \\
+$\tilde{\Delta}_\nu$        & Transmission peak splitting, $|\tilde{\nu}_+-\tilde{\nu}_-|$                  & --  & Sec.~\ref{subsec:transmission_spectrum} \\
+$\boldsymbol{\tilde{\Delta}}^{\mathrm{EP}},\ \boldsymbol{\tilde{\Delta}}^{\mathrm{TPD}},\ \boldsymbol{\tilde{\Delta}}^{\mathrm{TED}}$ & Locations of an EP, TPD, or TED in detuning space & -- & Secs.~\ref{subsec:eigenvalues}, \ref{subsec:transmission_spectrum}, \ref{sec:ted} \\
+$\boldsymbol{\tilde{\Delta}}^{\mathrm{NL}}$ & Onset of the instability (nonlinear) transition in detuning space         & -- & Sec.~\ref{section:results} \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Sensing framework and figures of merit}} \\
+$\boldsymbol{\tilde{\epsilon}},\ \boldsymbol{\tilde{\delta}}$ & Target-signal and (orthogonal) nuisance perturbations, $\boldsymbol{\tilde{\delta}}\!\cdot\!\boldsymbol{\tilde{\epsilon}}=0$ & -- & Sec.~\ref{section:design_guidance} \\
+$\boldsymbol{\tilde{\chi}}_{\boldsymbol{\tilde{\epsilon}}}$ & Sensor susceptibility, $\nabla_{\boldsymbol{\tilde{\epsilon}}}\tilde{\Delta}_\nu$ & -- & Sec.~\ref{section:design_guidance} \\
+$\tilde{a}_{\mathrm{sqrt}}^{\mathrm{TPD}},\ \tilde{a}_{\mathrm{sqrt}}^{\mathrm{TED}}$ & Square-root signal-splitting coefficients at TPD / TED & -- & Eqs.~\ref{eq:splitting_expansion_target}, \ref{eq:splitting_expansion} \\
+$\tilde{b}_{\mathrm{cbrt}}^{\mathrm{TPD}}$ & Cube-root nuisance splitting strength at the TPD                         & --  & Sec.~\ref{subsec:nuisance_scaling} \\
+$\mathrm{N}_{\mathrm{th}}$  & Thermal noise efficiency    & --  & Eq.~\ref{eq:tne_full} \\
+$\mathrm{dist}_{\mathrm{EP}},\ \mathrm{dist}_{\mathrm{Inst}}$ & Euclidean distance from TPD to the nearest EP / instability & -- & Sec.~\ref{subsec:additive_noise} \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Acronyms}} \\
+EP                          & Exceptional point                                                             & --  & Sec.~\ref{sec:intro} \\
+TPD                         & Transmission peak degeneracy                                                  & --  & Sec.~\ref{sec:intro} \\
+TED                         & Transmission extrema degeneracy                                               & --  & Sec.~\ref{subsec:transmission_spectrum} \\
+$\mathcal{PT}$              & Parity-time symmetry                                                          & --  & Sec.~\ref{sec:arch} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{widetext}
+
+\section{\label{appendix:comp_methods} Appendix G: Computer Algebra Methods}
+
+All symbolic derivations were performed using the MATLAB R2022b (The MathWorks, Inc., Natick, Massachusetts) Symbolic Math Toolbox version 9.2. The complete annotated computation, including intermediate steps and verifications, is provided in the supplementary repository at \href{https://github.com/Alex-Carney/EP_TPD_Unification/tree/master/theory}{GitHub-Theory}. The main text and appendices reproduce the key results and the prose reasoning connecting them; readers seeking the line-by-line algebraic verification are directed to the repository.
+
+\section{\label{appendix:e} Appendix H: Data and Code Availability}
+
+The data that support the findings of this study are available online on \href{https://github.com/Alex-Carney/EP_TPD_Unification}{GitHub}. Please follow instructions for downloading database files described in the repository description. The data analysis and figure generation code are available online on \href{https://github.com/Alex-Carney/EP_TPD_Unification}{GitHub}. 
+
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\end{document}
